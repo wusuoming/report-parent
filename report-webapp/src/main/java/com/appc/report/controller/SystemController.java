@@ -15,4 +15,11 @@ public class SystemController {
         //向视图中添加所要展示或使用的内容，将在页面中使用
         return mv;
     }
+
+    @RequestMapping(value = "/password", method = RequestMethod.GET)
+    public ModelAndView password() {
+        ModelAndView mv = new ModelAndView("password");//指定视图
+        //向视图中添加所要展示或使用的内容，将在页面中使用
+        return mv;
+    }
 }
