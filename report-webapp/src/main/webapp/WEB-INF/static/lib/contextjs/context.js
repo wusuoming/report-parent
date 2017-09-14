@@ -1,5 +1,11 @@
-layui.define('jquery', function (exports) {
-    $ = layui.jquery;
+/* 
+ * Context.js
+ * Copyright Jacob Kelley
+ * MIT License
+ */
+
+var context = context || (function () {
+
     var options = {
         fadeSpeed: 100,
         filter: function ($obj) {
@@ -13,9 +19,10 @@ layui.define('jquery', function (exports) {
     function initialize(opts) {
 
         options = $.extend({}, options, opts);
+
         $(document).on('click', 'html', function () {
             $('.dropdown-context').fadeOut(options.fadeSpeed, function () {
-                $('.dropdown-context').css({ display: '' }).find('.drop-left').removeClass('drop-left');
+                $('.dropdown-context').css({display: ''}).find('.drop-left').removeClass('drop-left');
             });
         });
         if (options.preventDoubleContext) {
@@ -83,15 +90,14 @@ layui.define('jquery', function (exports) {
     }
 
     function addContext(selector, data) {
-
         var d = new Date(),
             id = d.getTime(),
             $menu = buildMenu(data, id);
 
         $('body').append($menu);
 
-
         $(document).on('contextmenu', selector, function (e) {
+            window.openMenuTarget = e.target;
             e.preventDefault();
             e.stopPropagation();
 
@@ -124,14 +130,11 @@ layui.define('jquery', function (exports) {
     function destroyContext(selector) {
         $(document).off('contextmenu', selector).off('click', '.context-event');
     }
-    var context = {
+
+    return {
         init: initialize,
         settings: updateOptions,
         attach: addContext,
         destroy: destroyContext
     };
-    layui.addcss("modules/context.css",
-        function () { },
-        "contextcss");
-    exports('context', context);
-})
+})();
