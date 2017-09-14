@@ -8,16 +8,28 @@ http://www.springframework.org/schema/context
 http://www.springframework.org/schema/context/spring-context.xsd
 http://www.springframework.org/schema/mvc
 http://www.springframework.org/schema/mvc/spring-mvc.xsd">
-
+    <mvc:interceptors>
+        <mvc:interceptor>
+            <mvc:mapping path="/error" />
+            <bean class="basic.common.core.exception.ErrorInterceptor" />
+        </mvc:interceptor>
+    </mvc:interceptors>
+    <bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+        <property name="locations">
+            <list>
+                <value>classpath:properties/${spring.profiles.active:prd}/config.properties</value>
+            </list>
+        </property>
+    </bean>
+    <bean id="messageSource"
+          class="org.springframework.context.support.ReloadableResourceBundleMessageSource">
+        <property name="cacheSeconds" value="10"/>
+        <property name="basename" value="classpath:messages/message"/>
+    </bean>
     <!-- 搜索spring控件 -->
-    <context:component-scan base-package="com.appc.report"
-                            use-default-filters="false">
-        <context:include-filter type="annotation"
-                                expression="org.springframework.stereotype.Controller"/>
-        <context:include-filter type="annotation"
-                                expression="org.springframework.web.bind.annotation.RestController"/>
-        <context:include-filter type="annotation"
-                                expression="org.springframework.web.bind.annotation.ControllerAdvice"/>
+    <context:component-scan base-package="com.appc.report">
+        <context:exclude-filter type="annotation"
+                                expression="org.springframework.stereotype.Service"/>
     </context:component-scan>
     <mvc:annotation-driven/>
     <!-- 配置静态资源，直接映射到对应的文件夹，DispatcherServlet 不处理 -->
@@ -42,5 +54,24 @@ http://www.springframework.org/schema/mvc/spring-mvc.xsd">
           class="org.springframework.web.servlet.view.freemarker.FreeMarkerViewResolver">
         <property name="suffix" value=".html"/>
         <property name="contentType" value="text/html;charset=UTF-8"/>
+    </bean>
+    <bean id="springLoginInterceptor" class="com.appc.report.filter.SpringLoginInterceptor">
+    </bean>
+
+    <bean id="logInterceptor" class="com.appc.report.filter.LogInterceptor">
+    </bean>
+    <bean id="autoPorxyFactoryBean"
+          class="org.springframework.aop.framework.autoproxy.BeanNameAutoProxyCreator">
+        <property name="interceptorNames">
+            <list>
+                <value>springLoginInterceptor</value>
+                <value>logInterceptor</value>
+            </list>
+        </property>
+        <property name="beanNames">
+            <list>
+                <value>*Controller</value>
+            </list>
+        </property>
     </bean>
 </beans>

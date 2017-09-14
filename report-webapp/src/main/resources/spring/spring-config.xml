@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:tx="http://www.springframework.org/schema/tx" xmlns:task="http://www.springframework.org/schema/task"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+        http://www.springframework.org/schema/context
+        http://www.springframework.org/schema/context/spring-context-4.0.xsd
+        http://www.springframework.org/schema/tx
+        http://www.springframework.org/schema/tx/spring-tx-4.0.xsd
+        http://www.springframework.org/schema/task
+        http://www.springframework.org/schema/task/spring-task.xsd http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd">
+    <context:component-scan base-package="com.appc.report,basic.common.core">
+        <context:exclude-filter type="annotation"
+                                expression="org.springframework.stereotype.Controller"/>
+        <context:exclude-filter type="annotation"
+                                expression="org.springframework.web.bind.annotation.RestController"/>
+    </context:component-scan>
+
+    <bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+        <property name="locations">
+            <list>
+                <value>classpath:properties/${spring.profiles.active:prd}/config.properties</value>
+            </list>
+        </property>
+    </bean>
+    <bean id="messageSource"
+          class="org.springframework.context.support.ReloadableResourceBundleMessageSource">
+        <property name="cacheSeconds" value="10"></property>
+        <property name="basename">
+            <!-- 定义消息资源文件的相对路径 -->
+            <value>classpath:messages/message</value>
+        </property>
+    </bean>
+    <bean id="rescenterMySQL" class="com.alibaba.druid.pool.DruidDataSource"
+          init-method="init" destroy-method="close">
+        <!-- 配置连接池属性 -->
+        <property name="driverClassName" value="${jdbc_driverClassName}"/>
+        <property name="url" value="${jdbc_url}"/>
+        <property name="username" value="${jdbc_username}"/>
+        <property name="password" value="${jdbc_password}"/>
+
+        <!-- 配置初始化大小、最小、最大 -->
+        <property name="initialSize" value="1"/>
+        <property name="minIdle" value="1"/>
+        <property name="maxActive" value="10"/>
+
+        <!-- 配置获取连接等待超时的时间 -->
+        <property name="maxWait" value="10000"/>
+
+        <!-- 配置间隔多久才进行一次检测，检测需要关闭的空闲连接，单位是毫秒 -->
+        <property name="timeBetweenEvictionRunsMillis" value="60000"/>
+
+        <!-- 配置一个连接在池中最小生存的时间，单位是毫秒 -->
+        <property name="minEvictableIdleTimeMillis" value="300000"/>
+
+        <property name="testWhileIdle" value="true"/>
+
+        <!-- 这里建议配置为TRUE，防止取到的连接不可用 -->
+        <property name="testOnBorrow" value="true"/>
+        <property name="testOnReturn" value="false"/>
+
+        <!-- 打开PSCache，并且指定每个连接上PSCache的大小 -->
+        <property name="poolPreparedStatements" value="true"/>
+        <property name="maxPoolPreparedStatementPerConnectionSize"
+                  value="20"/>
+
+        <!-- 这里配置提交方式，默认就是TRUE，可以不用配置 -->
+
+        <property name="defaultAutoCommit" value="true"/>
+
+        <!-- 验证连接有效与否的SQL，不同的数据配置不同 -->
+        <property name="validationQuery" value="${jdbc.test.sql}"/>
+        <property name="filters" value="stat"/>
+        <property name="proxyFilters">
+            <list>
+                <ref bean="logFilter"/>
+            </list>
+        </property>
+    </bean>
+
+    <bean id="mybatisConfiguration" class="com.appc.framework.mybatis.MybatisConfiguration">
+        <property name="useGeneratedKeys" value="true"/>
+        <property name="useColumnLabel" value="true"/>
+        <property name="mapUnderscoreToCamelCase" value="true"/>
+    </bean>
+    <!-- 3.配置SqlSessionFactory对象 -->
+    <bean id="sqlSessionFactory" class="com.appc.framework.mybatis.MybatisSqlSessionFactoryBean">
+        <!-- 注入数据库连接池 -->
+        <property name="dataSource" ref="rescenterMySQL"/>
+        <!-- 配置MyBaties全局配置文件:mybatis-config.xml -->
+        <!--<property name="configLocation" value="classpath:mybatis-config.xml"/>-->
+        <property name="configuration" ref="mybatisConfiguration"/>
+        <!-- 扫描entity包 使用别名 -->
+        <property name="typeAliasesPackage" value="com.appc.report.model"/>
+        <!-- 扫描sql配置文件:mapper需要的xml文件 -->
+        <property name="mapperLocations" value="classpath*:/META-INF/**/*Mapper.xml"/>
+        <property name="plugins">
+            <list>
+                <bean class="com.appc.framework.mybatis.executor.intercetor.PageSortInterceptor"/>
+                <bean class="com.appc.framework.mybatis.executor.intercetor.WhereInterceptor"/>
+            </list>
+        </property>
+    </bean>
+
+    <!-- 4.配置扫描Dao接口包，动态实现Dao接口，注入到spring容器中 -->
+    <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+        <!-- 注入sqlSessionFactory -->
+        <property name="sqlSessionFactoryBeanName" value="sqlSessionFactory"/>
+        <!-- 给出需要扫描Dao接口包 -->
+        <property name="basePackage" value="com.appc.report.**.dao"/>
+    </bean>
+
+    <bean id="logFilter" class="com.alibaba.druid.filter.logging.Slf4jLogFilter">
+        <property name="statementExecutableSqlLogEnable" value="false"/>
+    </bean>
+    <bean class="com.appc.framework.mybatis.common.utils.SpringContextUtil"/>
+
+    <bean id="txManager"
+          class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="rescenterMySQL"/>
+    </bean>
+
+
+    <tx:advice id="txAdvice" transaction-manager="txManager">
+        <tx:attributes>
+            <tx:method name="remove*" propagation="REQUIRED" read-only="false" rollback-for="java.lang.Exception"/>
+            <tx:method name="delete*" propagation="REQUIRED" read-only="false" rollback-for="java.lang.Exception"/>
+            <tx:method name="add*" propagation="REQUIRED" read-only="false" rollback-for="java.lang.Exception"/>
+            <tx:method name="insert*" propagation="REQUIRED" read-only="false" rollback-for="java.lang.Exception"/>
+            <tx:method name="save*" propagation="REQUIRED" read-only="false" rollback-for="java.lang.Exception"/>
+            <tx:method name="update*" propagation="REQUIRED" read-only="false" rollback-for="java.lang.Exception"/>
+            <tx:method name="publish*" propagation="REQUIRED" read-only="false" rollback-for="java.lang.Exception"/>
+            <tx:method name="register" propagation="REQUIRED" read-only="false" rollback-for="java.lang.Exception"/>
+
+            <tx:method name="*" propagation="SUPPORTS" read-only="true"/>
+
+        </tx:attributes>
+    </tx:advice>
+    <tx:annotation-driven transaction-manager="txManager"/>
+    <aop:config>
+        <aop:pointcut id="pc" expression="execution(public * com.appc.report.service.impl.*.*(..))"/>
+        <aop:advisor pointcut-ref="pc" advice-ref="txAdvice"/>
+    </aop:config>
+
+    <!-- enable transaction annotation support -->
+    <tx:annotation-driven transaction-manager="txManager"/>
+
+
+    <!--定时任务 -->
+    <task:annotation-driven scheduler="qbScheduler" mode="proxy"/>
+    <task:scheduler id="qbScheduler" pool-size="100"/>
+    <!-- 配置线程池 -->
+    <bean id="taskExecutor"
+          class="org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor">
+        <!-- 线程池维护线程的最少数量 -->
+        <property name="corePoolSize" value="50"/>
+        <!-- 线程池维护线程所允许的空闲时间 -->
+        <property name="keepAliveSeconds" value="30000"/>
+        <!-- 线程池维护线程的最大数量 -->
+        <property name="maxPoolSize" value="10000"/>
+        <!-- 线程池所使用的缓冲队列 -->
+        <property name="queueCapacity" value="200000"/>
+        <!-- 线程池对拒绝任务(无线程可用)的处理策略 ThreadPoolExecutor.CallerRunsPolicy策略 ,调用者的线程会执行该任务,如果执行器已关闭,则丢弃. -->
+        <property name="rejectedExecutionHandler">
+            <bean class="java.util.concurrent.ThreadPoolExecutor$CallerRunsPolicy"/>
+        </property>
+    </bean>
+
+</beans>
