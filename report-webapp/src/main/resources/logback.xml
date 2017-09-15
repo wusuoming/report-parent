@@ -93,7 +93,7 @@
     </appender>
 
     <!-- 为某个包下的所有类的指定Appender 这里也可以指定类名称例如：com.aa.bb.ClassName -->
-    <logger name="org.springframework.web.servlet.DispatcherServlet" additivity="false" >
+    <logger name="com.appc.report" additivity="false">
         <level value="DEBUG"/>
         <appender-ref ref="stdout"/>
         <appender-ref ref="file.async"/><!-- 即com.lin包下级别为 ${log.root.level}的才会使用file.async来打印 -->

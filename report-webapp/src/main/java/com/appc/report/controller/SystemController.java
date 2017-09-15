@@ -11,6 +11,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.SessionAttribute;
 import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpSession;
@@ -36,11 +37,12 @@ public class SystemController {
         ModelAndView mv = new ModelAndView("login");//指定视图
         AdminUser user = adminUserService.getEntity(EntityCriteria.build().eq("username", username));
         if (user == null) {
-            mv.addObject("error_message", SpringUtils.getLocalMessage("210002"));
+            mv.addObject("error_message", SpringUtils.getLocalMessage("010002"));
         } else if (!user.getPassword().equals(MD5Util.getMD5String(password))) {
-            mv.addObject("error_message", SpringUtils.getLocalMessage("210003"));
+            mv.addObject("error_message", SpringUtils.getLocalMessage("010003"));
         } else {
             session.setAttribute(ReportConstants.SESSION_KEY, user);
+            mv = new ModelAndView("redirect:index.html");//指定视图
         }
         return mv;
     }
@@ -51,4 +53,24 @@ public class SystemController {
         //向视图中添加所要展示或使用的内容，将在页面中使用
         return mv;
     }
+
+    @RequestMapping(value = "/password", method = RequestMethod.POST)
+    public ModelAndView passwordPost(@RequestParam String oldpass,
+                                     @RequestParam String newpass,
+                                     @SessionAttribute("user") AdminUser sessionUser) {
+        ModelAndView mv = new ModelAndView("password");//指定视图
+        AdminUser user = adminUserService.getById(sessionUser.getId());
+        if (user == null) {
+            mv.addObject("error_message", SpringUtils.getLocalMessage("010002"));
+        } else if (!user.getPassword().equals(MD5Util.getMD5String(oldpass))) {
+            mv.addObject("error_message", SpringUtils.getLocalMessage("010015"));
+        } else {
+            user.setPassword(MD5Util.getMD5String(newpass));
+            adminUserService.updateById(user);
+            mv.addObject("success", true);
+
+        }
+        return mv;
+    }
+
 }

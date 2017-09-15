@@ -16,8 +16,17 @@
     <script src="./static/lib/layui/layui.js" charset="utf-8"></script>
     <script type="text/javascript" src="./static/js/xadmin.js"></script>
     <script type="text/javascript" src="./static/js/index/login.js" charset="utf-8"></script>
+    <script>
+        $(document).ready(function () {
+        <#if error_message??>
+            layui.use('layer', function () {
+                var layer = layui.layer;
 
-
+                layer.msg('${error_message}');
+            });
+        </#if>
+        });
+    </script>
 </head>
 <body class="login-bg">
 
