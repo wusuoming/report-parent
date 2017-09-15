@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.appc.report.dao.StatisticsDao">
+    <select id="informationStatistics" resultType="map">
+         SELECT
+            count(1) allCount,
+            count( IF(to_days(au.create_time) = to_days(now()),1,null) ) todayCount,
+            count( IF(to_days(now())-to_days(au.create_time)=1,1,null) ) yesterdayCount,
+            count( IF(YEARWEEK(date_format(au.create_time,'%Y-%m-%d')) = YEARWEEK(now()),1,null) ) weekCount,
+            count( IF(date_format(au.create_time, '%Y%m') = date_format(curdate() , '%Y%m'),1,null) )  monthCount
+        FROM
+            admin_user au
+        union all
+        SELECT
+            count(1) allCount,
+            count( IF(to_days(sl.request_date) = to_days(now()),1,null) ) todayCount,
+            count( IF(to_days(now())-to_days(sl.request_date)=1,1,null) ) yesterdayCount,
+            count( IF(YEARWEEK(date_format(sl.request_date,'%Y-%m-%d')) = YEARWEEK(now()),1,null) ) weekCount,
+            count( IF(date_format(sl.request_date, '%Y%m') = date_format(curdate() , '%Y%m'),1,null) )  monthCount
+        FROM system_log sl where sl.method_name='登录' and sl.request_user is not null
+
+        union all
+        SELECT
+            count(1) allCount,
+            count( IF(to_days(sl.request_date) = to_days(now()),1,null) ) todayCount,
+            count( IF(to_days(now())-to_days(sl.request_date)=1,1,null) ) yesterdayCount,
+            count( IF(YEARWEEK(date_format(sl.request_date,'%Y-%m-%d')) = YEARWEEK(now()),1,null) ) weekCount,
+            count( IF(date_format(sl.request_date, '%Y%m') = date_format(curdate() , '%Y%m'),1,null) )  monthCount
+        FROM system_log sl where sl.method_name='登录' and sl.request_user is   null
+    </select>
+</mapper>

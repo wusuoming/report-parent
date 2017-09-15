@@ -6,6 +6,7 @@ import com.appc.framework.mybatis.executor.criteria.EntityCriteria;
 import com.appc.report.common.ReportConstants;
 import com.appc.report.model.AdminUser;
 import com.appc.report.service.AdminUserService;
+import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.SessionAttribute;
 import org.springframework.web.servlet.ModelAndView;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
 
@@ -22,6 +24,8 @@ public class SystemController {
 
     @Autowired
     private AdminUserService adminUserService;
+    @Autowired
+    private HttpServletRequest request;
 
     @RequestMapping(value = "/login", method = RequestMethod.GET)
     public ModelAndView login() {
@@ -30,6 +34,15 @@ public class SystemController {
         return mv;
     }
 
+    @RequestMapping(value = "/logout", method = RequestMethod.GET)
+    public ModelAndView logout() {
+        request.getSession().invalidate();
+        ModelAndView mv = new ModelAndView("redirect:login.html");//指定视图
+        //向视图中添加所要展示或使用的内容，将在页面中使用
+        return mv;
+    }
+
+    @ApiOperation(ReportConstants.LOGIN)
     @RequestMapping(value = "/login", method = RequestMethod.POST)
     public ModelAndView loginPost(@RequestParam String username,
                                   @RequestParam String password,
@@ -54,9 +67,10 @@ public class SystemController {
         return mv;
     }
 
+    @ApiOperation("修改密码")
     @RequestMapping(value = "/password", method = RequestMethod.POST)
     public ModelAndView passwordPost(@RequestParam String oldpass,
-                                     @RequestParam String newpass,
+                                     @RequestParam String password,
                                      @SessionAttribute("user") AdminUser sessionUser) {
         ModelAndView mv = new ModelAndView("password");//指定视图
         AdminUser user = adminUserService.getById(sessionUser.getId());
@@ -65,7 +79,7 @@ public class SystemController {
         } else if (!user.getPassword().equals(MD5Util.getMD5String(oldpass))) {
             mv.addObject("error_message", SpringUtils.getLocalMessage("010015"));
         } else {
-            user.setPassword(MD5Util.getMD5String(newpass));
+            user.setPassword(MD5Util.getMD5String(password));
             adminUserService.updateById(user);
             mv.addObject("success", true);
 

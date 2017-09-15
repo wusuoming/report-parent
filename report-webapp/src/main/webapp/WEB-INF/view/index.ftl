@@ -42,7 +42,7 @@
                     <a onclick="x_admin_show('修改密码','password.html')">修改密码</a>
                 </dd>
                 <dd>
-                    <a href="./login.html">退出</a>
+                    <a href="./logout.html">退出</a>
                 </dd>
             </dl>
         </li>
@@ -157,7 +157,7 @@
 <!-- 左侧菜单结束 -->
 <!-- 右侧主体开始 -->
 <div class="page-content">
-    <div class="layui-tab tab"   lay-filter="xbs_tab" lay-allowclose="false">
+    <div class="layui-tab tab" lay-filter="xbs_tab" lay-allowclose="false">
         <ul class="layui-tab-title">
             <li class="layui-this" lay-id="1">我的桌面</li>
         </ul>

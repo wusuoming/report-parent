@@ -1,5 +1,6 @@
 package com.appc.report.filter;
 
+
 import basic.common.core.exception.BaseException;
 import basic.common.core.id.IdUtil;
 import basic.common.core.utils.IPUtils;
@@ -16,13 +17,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.task.TaskExecutor;
+import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import java.lang.reflect.Method;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 /**
  * 日志拦截器
@@ -42,6 +42,7 @@ public class LogInterceptor implements MethodInterceptor {
     @Autowired
     private SystemLogService systemLogService;
 
+
     public Object invoke(MethodInvocation invocation) throws Throwable {
         Long startTime = System.currentTimeMillis();
         Long logId = IdUtil.getId();
@@ -53,39 +54,41 @@ public class LogInterceptor implements MethodInterceptor {
             try {
                 result = invocation.proceed();
             } catch (Exception e) {
-                updateSystemLog(logId, e, result, System.currentTimeMillis() - startTime);
+                updateSystemLog(logId, e, result, System.currentTimeMillis()
+                        - startTime);
                 throw e;
             }
-            updateSystemLog(logId, null, result, System.currentTimeMillis() - startTime);
+            updateSystemLog(logId, null, result, System.currentTimeMillis()
+                    - startTime);
             return result;
         } else {
             return invocation.proceed();
         }
-
     }
 
-    /**
-     * TODO 这里用一句话描述这个方法的作用
-     *
-     * @param logId
-     * @param e
-     * @param result
-     * @param runTime
-     */
-    private void updateSystemLog(final Long logId, final Exception e, final Object result, final Long runTime) {
+
+    private void updateSystemLog(final Long logId, final Exception e,
+                                 final Object result, final Long runTime) {
+        final Object requestArgument = request.getAttribute(ReportConstants.REQUEST_ARGUMENT);
+        HttpSession session = request.getSession();
+        final AdminUser user = (AdminUser) session.getAttribute(ReportConstants.SESSION_KEY);
+
         taskExecutor.execute(new Runnable() {
             @Override
             public void run() {
                 SystemLog systemLog = systemLogService.getById(logId);
                 if (systemLog != null) {
                     systemLog.setResponseTime(runTime);
+                    if (user != null)
+                        systemLog.setRequestUser(user.getId());
                     if (e != null) {
                         if (e instanceof BaseException) {
                             Map<String, String> resultException = new HashMap<>();
                             String code = ((BaseException) e).getCode();
+                            String[] value = ((BaseException) e).getValue();
                             resultException.put("code", code);
                             try {
-                                resultException.put("message", SpringUtils.getLocalMessage(code));
+                                resultException.put("message", SpringUtils.getMessage(code, value));
                             } catch (Exception e1) {
                                 e1.printStackTrace();
                             }
@@ -94,8 +97,19 @@ public class LogInterceptor implements MethodInterceptor {
                             systemLog.setResponseException(e.getMessage());
                         }
                     } else {
-                        systemLog.setResponseResult(JSONUtils.toJSONString(result));
+                        try {
+                            if (result instanceof ModelAndView) {
+                                systemLog.setResponseResult(((ModelAndView) result).getViewName());
+                            } else {
+                                systemLog.setResponseResult(JSONUtils.toJSONString(result));
+                            }
+                        } catch (Exception ignored) {
+                        }
                     }
+                    if (requestArgument != null) {
+                        systemLog.setRequestArguments((requestArgument instanceof String) ? (String) requestArgument : JSONUtils.toJSONString(requestArgument));
+                    }
+
                     systemLogService.updateById(systemLog);
                 } else {
                     try {
@@ -111,7 +125,8 @@ public class LogInterceptor implements MethodInterceptor {
 
     }
 
-    public void insertSystemLog(final Object[] arguments, final HttpServletRequest request, final Method method,
+    public void insertSystemLog(final Object[] arguments,
+                                final HttpServletRequest request, final Method method,
                                 final Long logId) {
         final String url = request.getRequestURL().toString();
         HttpSession session = request.getSession();
@@ -122,7 +137,8 @@ public class LogInterceptor implements MethodInterceptor {
 
             @Override
             public void run() {
-                ApiOperation apiOperation = method.getAnnotation(ApiOperation.class);
+                ApiOperation apiOperation = method
+                        .getAnnotation(ApiOperation.class);
                 SystemLog systemLog = new SystemLog();
                 systemLog.setLogId(logId);
                 systemLog.setRequestIp(ip);
@@ -131,11 +147,16 @@ public class LogInterceptor implements MethodInterceptor {
                 systemLog.setMethodName(apiOperation.value());
 
                 if (user != null)
-                    systemLog.setRequestUser(user.getUsername());
-                if (arguments != null && arguments.length > 0 && !method.getName().equals("login")
-                        && !method.getName().toLowerCase().contains("password"))
+                    systemLog.setRequestUser(user.getId());
+                if (arguments != null
+                        && arguments.length > 0)
                     try {
-                        systemLog.setRequestArguments(JSONUtils.toJSONString(arguments));
+                        List<Object> objectList = new ArrayList<>();
+                        for (Object argument : arguments) {
+                            if (!(argument instanceof HttpSession || argument instanceof HttpServletRequest || argument instanceof AdminUser))
+                                objectList.add(argument);
+                        }
+                        systemLog.setRequestArguments(JSONUtils.toJSONString(objectList));
                     } catch (Exception e) {
                         e.getMessage();
                     }
@@ -143,8 +164,8 @@ public class LogInterceptor implements MethodInterceptor {
                 logger.info("uri: {}", url);
                 logger.info("method: {}", method);
                 systemLogService.insert(systemLog);
-
             }
+
         });
 
     }

@@ -5,7 +5,7 @@ $(document).ready(function () {
         {
             text: '刷新', action: function (e) {
             if ($(openMenuTarget).hasClass("layui-this")) {
-                var iframe = $("iframe[tab-id$='" + layId + "']");
+                var iframe = $("iframe[tab-id$='" +  $(openMenuTarget).attr("lay-id") + "']");
                 iframe[0].contentWindow.location.reload(true);
             } else {
                 layer.alert('只能在当前选中节点刷新', {icon: 5});

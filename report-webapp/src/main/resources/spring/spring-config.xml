@@ -96,7 +96,7 @@
         <!-- 扫描entity包 使用别名 -->
         <property name="typeAliasesPackage" value="com.appc.report.model"/>
         <!-- 扫描sql配置文件:mapper需要的xml文件 -->
-        <property name="mapperLocations" value="classpath*:/META-INF/**/*Mapper.xml"/>
+        <property name="mapperLocations" value="classpath*:/mybatis/*Mapper.xml"/>
         <property name="plugins">
             <list>
                 <bean class="com.appc.framework.mybatis.executor.intercetor.PageSortInterceptor"/>

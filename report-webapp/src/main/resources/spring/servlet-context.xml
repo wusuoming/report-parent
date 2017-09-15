@@ -10,8 +10,8 @@ http://www.springframework.org/schema/mvc
 http://www.springframework.org/schema/mvc/spring-mvc.xsd">
     <mvc:interceptors>
         <mvc:interceptor>
-            <mvc:mapping path="/error" />
-            <bean class="basic.common.core.exception.ErrorInterceptor" />
+            <mvc:mapping path="/error"/>
+            <bean class="basic.common.core.exception.ErrorInterceptor"/>
         </mvc:interceptor>
     </mvc:interceptors>
     <bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
@@ -31,8 +31,21 @@ http://www.springframework.org/schema/mvc/spring-mvc.xsd">
         <context:exclude-filter type="annotation"
                                 expression="org.springframework.stereotype.Service"/>
     </context:component-scan>
-    <mvc:annotation-driven/>
-    <!-- 配置静态资源，直接映射到对应的文件夹，DispatcherServlet 不处理 -->
+    <mvc:annotation-driven>
+        <mvc:message-converters>
+            <bean class="com.appc.report.common.SimpleHttpMessageConverter">
+                <property name="objectMapper">
+                    <bean class="com.fasterxml.jackson.databind.ObjectMapper">
+                        <property name="dateFormat">
+                            <bean class="java.text.SimpleDateFormat">
+                                <constructor-arg type="java.lang.String" value="yyyy-MM-dd HH:mm:ss"/>
+                            </bean>
+                        </property>
+                    </bean>
+                </property>
+            </bean>
+        </mvc:message-converters>
+    </mvc:annotation-driven>    <!-- 配置静态资源，直接映射到对应的文件夹，DispatcherServlet 不处理 -->
     <mvc:resources mapping="/static/**" location="/WEB-INF/static/"/>
     <!-- Freemarker配置 -->
     <bean id="freemarkerConfig"
