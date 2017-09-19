@@ -3,12 +3,12 @@ package com.appc.report.service;
 import com.appc.report.model.AdminUserMenu;
 
 /**
- *  AdminUserMenuService
+ * AdminUserMenuService
  *
  * @version : Ver 1.0
- * @author	: panda
- * @date	: 2017-9-14 
+ * @author    : panda
+ * @date    : 2017-9-14
  */
-public interface AdminUserMenuService    extends CommonService<AdminUserMenu>{
-	
-	 }
+public interface AdminUserMenuService extends CommonService<AdminUserMenu> {
+
+}

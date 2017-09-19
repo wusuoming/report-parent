@@ -50,7 +50,7 @@
         <button class="layui-btn layui-btn-danger" onclick="delAll()"><i class="layui-icon"></i>批量删除</button>
         <button class="layui-btn" onclick="x_admin_show('添加权限','rule.html')"><i class="layui-icon"></i>添加</button>
     </xblock>
-    <table class="layui-hide" id="table_rule" lay-filter="user"></table>
+    <table class="layui-hide" id="table_rule" lay-filter="rule"></table>
 </div>
 
 <script>
@@ -84,7 +84,7 @@
         })
         ;
         //监听工具条
-        table.on('tool(user)', function (obj) {
+        table.on('tool(rule)', function (obj) {
             var data = obj.data;
             if (obj.event === 'del') {
                 layer.confirm('真的删除行么', function (index) {

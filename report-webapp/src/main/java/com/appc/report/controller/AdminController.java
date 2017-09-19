@@ -3,8 +3,10 @@ package com.appc.report.controller;
 import com.appc.framework.mybatis.executor.criteria.Criteria;
 import com.appc.framework.mybatis.executor.criteria.EntityCriteria;
 import com.appc.report.dto.PageDto;
+import com.appc.report.model.Role;
 import com.appc.report.model.Rule;
 import com.appc.report.model.RuleCate;
+import com.appc.report.service.RoleService;
 import com.appc.report.service.RuleCateService;
 import com.appc.report.service.RuleService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,6 +32,9 @@ public class AdminController {
 
     @Autowired
     private RuleService ruleService;
+
+    @Autowired
+    private RoleService roleService;
     @Autowired
     private RuleCateService ruleCateService;
 
@@ -57,15 +62,30 @@ public class AdminController {
         return mv;
     }
 
-    @RequestMapping(value = "role", method = RequestMethod.GET)
-    public ModelAndView role() {
-        ModelAndView mv = new ModelAndView("admin/admin-role");
+    @RequestMapping(value = "role-list", method = RequestMethod.GET)
+    public ModelAndView roleList() {
+        ModelAndView mv = new ModelAndView("admin/admin-role-list");
         return mv;
     }
 
-    @RequestMapping(value = "roleAdd", method = RequestMethod.GET)
-    public ModelAndView roleAdd() {
-        ModelAndView mv = new ModelAndView("admin/role-add");
+    @RequestMapping(value = "role", method = RequestMethod.GET)
+    public ModelAndView role(@RequestParam(required = false) Long id) {
+        ModelAndView mv = new ModelAndView("admin/admin-role");
+        mv.addObject("role", roleService.getById(id));
+        mv.addObject("ruleCates", ruleCateService.getEntityList());
+        return mv;
+    }
+
+    @RequestMapping(value = "role", method = RequestMethod.POST)
+    public ModelAndView rolePost(Role role) {
+        ModelAndView mv = new ModelAndView("admin/admin-role");
+        if (role.getRoleId() != null) {
+            roleService.updateById(role);
+        } else {
+            role.setCreateTime(new Date());
+            roleService.insert(role);
+        }
+        mv.addObject("success", true);
         return mv;
     }
 
@@ -156,5 +176,36 @@ public class AdminController {
         }
         List<RuleCate> rules = ruleCateService.getEntityList(criteria);
         return PageDto.create((long) rules.size(), rules);
+    }
+
+    @RequestMapping(value = "queryRole", method = RequestMethod.GET)
+    @ResponseBody
+    public PageDto queryRole(@RequestParam(required = false) String roleName, String status) {
+        Criteria criteria = EntityCriteria.build();
+        if (!StringUtils.isEmpty(roleName)) {
+            criteria.like("role_name", roleName);
+        }
+        if (!StringUtils.isEmpty(status)) {
+            criteria.eq("status", status);
+        }
+        List<Role> roles = roleService.getEntityList(criteria);
+        return PageDto.create((long) roles.size(), roles);
+    }
+
+    @RequestMapping(value = "role", method = RequestMethod.DELETE)
+    @ResponseBody
+    public void roleDelete(@RequestParam Long... ids) {
+        for (Long id : ids) {
+            roleService.deleteById(id);
+        }
+    }
+
+    @RequestMapping(value = "stopRole", method = RequestMethod.PUT)
+    @ResponseBody
+    public void stopRole(@RequestParam Integer id, @RequestParam String status) {
+        Role role = new Role();
+        role.setRoleId(id);
+        role.setStatus(status);
+        roleService.updateById(role);
     }
 }

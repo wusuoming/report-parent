@@ -8,9 +8,9 @@ import org.springframework.stereotype.Service;
 /**
  * AdminUserMenuServiceImpl
  *
+ * @author : panda
  * @version : Ver 1.0
- * @author    : panda
- * @date    : 2017-9-14
+ * @date : 2017-9-14
  */
 @Service
 public class AdminUserMenuServiceImpl extends CommonServiceImpl<AdminUserMenu, AdminUserMenuDao> implements AdminUserMenuService {

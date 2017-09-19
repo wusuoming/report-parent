@@ -105,7 +105,7 @@
         <dependency>
             <groupId>com.appc</groupId>
             <artifactId>framework-mybatis</artifactId>
-            <version>1.0.5-beta</version>
+            <version>1.0.7-RELEASE</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.slf4j</groupId>
@@ -113,18 +113,20 @@
                 </exclusion>
             </exclusions>
         </dependency>
-        <dependency>
-            <groupId>io.swagger</groupId>
-            <artifactId>swagger-annotations</artifactId>
-            <version>1.5.16</version>
-        </dependency>
-        <dependency>
-            <groupId>io.swagger</groupId>
-            <artifactId>swagger-annotations</artifactId>
-            <version>1.5.16</version>
-        </dependency>
     </dependencies>
     <build>
         <finalName>report</finalName>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.1</version>
+                <configuration>
+                    <compilerVersion>1.8</compilerVersion>
+                    <source>1.8</source>
+                    <target>1.8</target>
+                </configuration>
+            </plugin>
+        </plugins>
     </build>
 </project>
