@@ -79,12 +79,8 @@ public class AdminController {
     @RequestMapping(value = "role", method = RequestMethod.POST)
     public ModelAndView rolePost(Role role) {
         ModelAndView mv = new ModelAndView("admin/admin-role");
-        if (role.getRoleId() != null) {
-            roleService.updateById(role);
-        } else {
-            role.setCreateTime(new Date());
-            roleService.insert(role);
-        }
+        roleService.save(role);
+
         mv.addObject("success", true);
         return mv;
     }

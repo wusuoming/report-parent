@@ -74,7 +74,7 @@
                         </a>
                     </li>
                     <li>
-                        <a _href="admin/role.html">
+                        <a _href="admin/role-list.html">
                             <i class="iconfont">&#xe6a7;</i>
                             <cite>角色管理</cite>
                         </a>

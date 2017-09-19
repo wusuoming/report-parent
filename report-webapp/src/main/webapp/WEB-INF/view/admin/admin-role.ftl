@@ -45,8 +45,7 @@
                 <#list ruleCates as ruleCate>
                 <tr>
                     <td>
-
-                        <input name="id[]" type="checkbox" lay-filter="allChoose" title="${ruleCate.cateName}">
+                        <input type="checkbox" lay-filter="allChoose" title="${ruleCate.cateName}" value="allChoose">
                     </td>
                     <td>
                         <div class="layui-input-block">
@@ -126,6 +125,22 @@
             return true;
         });
 
+    });
+    $(document).ready(function () {
+        layui.use(['form', 'layer'], function () {
+            var form = layui.form;
+        <#list role.roleRules as roleRule>
+         $('input[type="checkbox"][value="${roleRule.ruleId}"]').attr("checked", "checked");
+
+        </#list>
+            $(".layui-table tr").each(function (index, tr) {
+                var checkbox = $(tr).find($('input[type="checkbox"]').not("input:checked"));
+                if (checkbox.length === 1) {
+                    checkbox.attr("checked", "checked");
+                }
+            })
+            form.render('checkbox');
+        });
     });
 </script>
 
