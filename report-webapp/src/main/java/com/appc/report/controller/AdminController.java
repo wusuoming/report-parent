@@ -110,7 +110,7 @@ public class AdminController {
         Sort sortObj = new Sort(new Sort.Order(Sort.Direction.DESC, "pay_time"));
         Pageable pageable = new PageRequest(page - 1, limit, null);
         Criteria criteria = EntityCriteria.build();
-        if (StringUtils.isEmpty(ruleName)) {
+        if (!StringUtils.isEmpty(ruleName)) {
             criteria.like("rule_name", ruleName);
         }
         if (ruleType != null) {
