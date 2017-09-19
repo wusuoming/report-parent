@@ -4,6 +4,7 @@ import com.appc.framework.mybatis.executor.criteria.Criteria;
 import com.appc.framework.mybatis.executor.criteria.EntityCriteria;
 import com.appc.report.dto.PageDto;
 import com.appc.report.model.Rule;
+import com.appc.report.model.RuleCate;
 import com.appc.report.service.RuleCateService;
 import com.appc.report.service.RuleService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +21,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
 
 import java.util.Date;
+import java.util.List;
 
 
 @Controller
@@ -37,9 +39,9 @@ public class AdminController {
         return mv;
     }
 
-    @RequestMapping(value = "cate", method = RequestMethod.GET)
+    @RequestMapping(value = "rule-cate", method = RequestMethod.GET)
     public ModelAndView cate() {
-        ModelAndView mv = new ModelAndView("admin/admin-cate");
+        ModelAndView mv = new ModelAndView("admin/admin-rule-cate");
         return mv;
     }
 
@@ -123,4 +125,36 @@ public class AdminController {
         return PageDto.create(rules.getTotalElements(), rules.getContent());
     }
 
+    @RequestMapping(value = "ruleCate", method = RequestMethod.DELETE)
+    @ResponseBody
+    public void ruleCateDelete(@RequestParam Long... ids) {
+        for (Long id : ids) {
+            ruleCateService.deleteById(id);
+        }
+    }
+
+    @RequestMapping(value = "ruleCate", method = RequestMethod.PUT)
+    @ResponseBody
+    public void ruleCateDelete(@RequestParam(required = false) Long id, @RequestParam String name) {
+        RuleCate ruleCate = new RuleCate();
+        ruleCate.setCateName(name);
+        if (id != null) {
+            ruleCate.setCateId(id);
+            ruleCateService.updateById(ruleCate);
+        } else {
+            ruleCate.setCreateTime(new Date());
+            ruleCateService.insert(ruleCate);
+        }
+    }
+
+    @RequestMapping(value = "queryRuleCate", method = RequestMethod.GET)
+    @ResponseBody
+    public PageDto queryRuleCate(@RequestParam(required = false) String cateName) {
+        Criteria criteria = EntityCriteria.build();
+        if (!StringUtils.isEmpty(cateName)) {
+            criteria.like("cate_name", cateName);
+        }
+        List<RuleCate> rules = ruleCateService.getEntityList(criteria);
+        return PageDto.create((long) rules.size(), rules);
+    }
 }

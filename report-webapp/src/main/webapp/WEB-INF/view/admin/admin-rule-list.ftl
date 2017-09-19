@@ -30,9 +30,9 @@
             <div class="layui-input-inline">
                 <select name="ruleCate">
                     <option value="">权限分类</option>
-                    <#list ruleCates as ruleCate>
-                        <option value="${ruleCate.cateId}">${ruleCate.cateName}</option>
-                    </#list>
+                <#list ruleCates as ruleCate>
+                    <option value="${ruleCate.cateId}">${ruleCate.cateName}</option>
+                </#list>
                 </select>
             </div>
             <div class="layui-input-inline">
@@ -89,7 +89,7 @@
             if (obj.event === 'del') {
                 layer.confirm('真的删除行么', function (index) {
                     $.ajax({
-                        url: 'rule?id=' + data.ruleId,
+                        url: 'rule?ids=' + data.ruleId,
                         type: 'DELETE',
                         success: function (result) {
                             table.reload('ruleReload', {
@@ -153,7 +153,7 @@
 </script>
 <script type="text/html" id="ruleCates">
     <#list ruleCates as ruleCate>
-         {{#  if(d.ruleCate == ${ruleCate.cateId}){ }}${ruleCate.cateName}{{#  } }}
+    {{#  if(d.ruleCate == ${ruleCate.cateId}){ }}${ruleCate.cateName}{{#  } }}
     </#list>
 </script>
 <script type="text/html" id="barDemo">
