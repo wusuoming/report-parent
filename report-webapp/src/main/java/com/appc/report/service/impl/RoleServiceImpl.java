@@ -1,7 +1,10 @@
 package com.appc.report.service.impl;
 
+import basic.common.core.exception.BaseException;
+import com.appc.framework.mybatis.executor.criteria.EntityCriteria;
 import com.appc.report.dao.RoleDao;
 import com.appc.report.dao.RoleRuleDao;
+import com.appc.report.dao.UserRoleDao;
 import com.appc.report.model.Role;
 import com.appc.report.model.RoleRule;
 import com.appc.report.service.RoleService;
@@ -23,6 +26,9 @@ public class RoleServiceImpl extends CommonServiceImpl<Role, RoleDao> implements
     @Autowired
     private RoleRuleDao roleRuleDao;
 
+    @Autowired
+    private UserRoleDao userRoleDao;
+
     @Override
     public void save(Role role) {
         if (role.getRoleId() != null) {
@@ -30,11 +36,23 @@ public class RoleServiceImpl extends CommonServiceImpl<Role, RoleDao> implements
             updateById(role);
         } else {
             role.setCreateTime(new Date());
+            role.setStatus("0");
             insert(role);
         }
         for (RoleRule roleRule : role.getRoleRules()) {
             roleRule.setRoleId(role.getRoleId());
         }
         roleRuleDao.insertBatch(role.getRoleRules());
+    }
+
+    @Override
+    public void delete(Long[] ids) {
+        for (Long id : ids) {
+            if (userRoleDao.getEntityCount(EntityCriteria.build().eq("role_id", id)) > 0) {
+                throw new BaseException("020003");
+            }
+            roleRuleDao.deleteByRoleId(id);
+            deleteById(id);
+        }
     }
 }

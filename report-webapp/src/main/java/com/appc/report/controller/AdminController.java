@@ -3,9 +3,11 @@ package com.appc.report.controller;
 import com.appc.framework.mybatis.executor.criteria.Criteria;
 import com.appc.framework.mybatis.executor.criteria.EntityCriteria;
 import com.appc.report.dto.PageDto;
+import com.appc.report.model.AdminUser;
 import com.appc.report.model.Role;
 import com.appc.report.model.Rule;
 import com.appc.report.model.RuleCate;
+import com.appc.report.service.AdminUserService;
 import com.appc.report.service.RoleService;
 import com.appc.report.service.RuleCateService;
 import com.appc.report.service.RuleService;
@@ -35,12 +37,17 @@ public class AdminController {
 
     @Autowired
     private RoleService roleService;
+
+    @Autowired
+    private AdminUserService adminUserService;
     @Autowired
     private RuleCateService ruleCateService;
 
-    @RequestMapping(value = "add", method = RequestMethod.GET)
-    public ModelAndView add() {
-        ModelAndView mv = new ModelAndView("admin/admin-add");
+    @RequestMapping(value = "user", method = RequestMethod.GET)
+    public ModelAndView user(@RequestParam(required = false) Long id) {
+        ModelAndView mv = new ModelAndView("admin/admin-user");
+        mv.addObject("adminUser", adminUserService.getById(id));
+        mv.addObject("roles", roleService.getEntityList());
         return mv;
     }
 
@@ -50,15 +57,9 @@ public class AdminController {
         return mv;
     }
 
-    @RequestMapping(value = "edit", method = RequestMethod.GET)
-    public ModelAndView edit() {
-        ModelAndView mv = new ModelAndView("admin/admin-edit");
-        return mv;
-    }
-
-    @RequestMapping(value = "list", method = RequestMethod.GET)
-    public ModelAndView list() {
-        ModelAndView mv = new ModelAndView("admin/admin-list");
+    @RequestMapping(value = "user-list", method = RequestMethod.GET)
+    public ModelAndView userList() {
+        ModelAndView mv = new ModelAndView("admin/admin-user-list");
         return mv;
     }
 
@@ -97,6 +98,15 @@ public class AdminController {
         mv.addObject("success", true);
         return mv;
     }
+
+    @RequestMapping(value = "user", method = RequestMethod.POST)
+    public ModelAndView userPost(AdminUser user) {
+        ModelAndView mv = new ModelAndView("admin/admin-user");
+        adminUserService.save(user);
+        mv.addObject("success", true);
+        return mv;
+    }
+
 
     @RequestMapping(value = "rule", method = RequestMethod.DELETE)
     @ResponseBody
@@ -188,20 +198,69 @@ public class AdminController {
         return PageDto.create((long) roles.size(), roles);
     }
 
+    @RequestMapping(value = "queryAdminUser", method = RequestMethod.GET)
+    @ResponseBody
+    public PageDto queryAdminUser(@RequestParam(required = false) String username,
+                                  @RequestParam(required = false) String nikeName,
+                                  @RequestParam(required = false) String phone,
+                                  @RequestParam(required = false) String email,
+                                  @RequestParam(required = false) String status) {
+        Criteria criteria = EntityCriteria.build().ne("status", "-1");
+        if (!StringUtils.isEmpty(nikeName)) {
+            criteria.like("nike_name", nikeName);
+        }
+        if (!StringUtils.isEmpty(phone)) {
+            criteria.eq("phone", phone);
+        }
+        if (!StringUtils.isEmpty(email)) {
+            criteria.eq("email", email);
+        }
+        if (!StringUtils.isEmpty(username)) {
+            criteria.eq("username", username);
+        }
+        if (!StringUtils.isEmpty(status)) {
+            criteria.eq("status", status);
+        }
+        List<AdminUser> users = adminUserService.getEntityList(criteria);
+
+        return PageDto.create((long) users.size(), users);
+    }
+
     @RequestMapping(value = "role", method = RequestMethod.DELETE)
     @ResponseBody
     public void roleDelete(@RequestParam Long... ids) {
+        roleService.delete(ids);
+
+    }
+
+    @RequestMapping(value = "stopAdminUser", method = RequestMethod.PUT)
+    @ResponseBody
+    public void stopAdminUser(@RequestParam Long id, @RequestParam String status) {
+        AdminUser adminUser = new AdminUser();
+        adminUser.setId(id);
+        adminUser.setStatus(status);
+        adminUserService.updateById(adminUser);
+    }
+
+    @RequestMapping(value = "user", method = RequestMethod.DELETE)
+    @ResponseBody
+    public void userDelete(@RequestParam Long... ids) {
         for (Long id : ids) {
-            roleService.deleteById(id);
+            AdminUser adminUser = new AdminUser();
+            adminUser.setId(id);
+            adminUser.setStatus("-1");
+            adminUserService.updateById(adminUser);
         }
     }
 
     @RequestMapping(value = "stopRole", method = RequestMethod.PUT)
     @ResponseBody
-    public void stopRole(@RequestParam Integer id, @RequestParam String status) {
+    public void stopRole(@RequestParam Long id, @RequestParam String status) {
         Role role = new Role();
         role.setRoleId(id);
         role.setStatus(status);
         roleService.updateById(role);
     }
+
+
 }

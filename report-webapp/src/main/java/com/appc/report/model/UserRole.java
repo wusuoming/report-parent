@@ -36,7 +36,7 @@ public class UserRole implements Serializable {
     @Where
     @Getter(onMethod = @__({@ApiModelProperty("")}))
     @Setter(onMethod = @__({@ApiModelProperty("")}))
-    private Integer userId;
+    private Long userId;
 
     /**
      *

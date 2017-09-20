@@ -67,7 +67,7 @@
                 描述
             </label>
             <div class="layui-input-block">
-                <textarea placeholder="请输入内容" id="desc" name="desc"
+                <textarea placeholder="请输入内容" id="roleDiscription" name="roleDiscription"
                           class="layui-textarea">${role.roleDiscription}</textarea>
             </div>
         </div>

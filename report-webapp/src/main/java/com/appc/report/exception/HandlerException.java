@@ -9,7 +9,7 @@ public class HandlerException {
 
     @ExceptionHandler({Throwable.class})
     public ModelAndView handleArithmeticException(Throwable ex) {
-        System.out.println("出异常了: " + ex);
+        ex.printStackTrace();
         ModelAndView mv = new ModelAndView("error/404");
         mv.addObject("exception", ex);
         return mv;

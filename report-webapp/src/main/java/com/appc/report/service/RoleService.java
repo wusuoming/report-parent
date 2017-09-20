@@ -12,4 +12,6 @@ import com.appc.report.model.Role;
 public interface RoleService extends CommonService<Role> {
 
     void save(Role role);
+
+    void delete(Long[] ids);
 }

@@ -15,5 +15,5 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface RoleRuleDao extends BasicCrudDao<RoleRule> {
 
-    void deleteByRoleId(@Param("roleId") Integer roleId);
+    void deleteByRoleId(@Param("roleId") Long roleId);
 }

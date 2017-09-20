@@ -25,7 +25,10 @@
 <div class="x-body">
     <div class="layui-row">
         <form class="layui-form layui-col-md12 x-so layui-form-pane">
-            <input class="layui-input" placeholder="角色名" name="roleName">
+            <input class="layui-input" placeholder="用户名" name="username">
+            <input class="layui-input" placeholder="昵称" name="nikeName">
+            <input class="layui-input" type="tel" placeholder="手机" name="phone"  />
+            <input class="layui-input" type="email" placeholder="邮箱" name="email"  />
             <div class="layui-input-inline">
                 <select name="status">
                     <option value="">状态</option>
@@ -37,16 +40,30 @@
         </form>
     </div>
     <xblock>
-        <button class="layui-btn" onclick="x_admin_show('添加角色','role.html')"><i class="layui-icon"></i>添加</button>
+        <button class="layui-btn" onclick="x_admin_show('添加角色','user.html')"><i class="layui-icon"></i>添加</button>
     </xblock>
 
-    <table class="layui-hide" id="table_role" lay-filter="role"></table>
+    <table class="layui-hide" id="table_user" lay-filter="role"></table>
 
 </div>
 <script>
+    layui.use('laydate', function () {
+        var laydate = layui.laydate;
+
+        //执行一个laydate实例
+        laydate.render({
+            elem: '#start' //指定元素
+        });
+
+        //执行一个laydate实例
+        laydate.render({
+            elem: '#end' //指定元素
+        });
+    });
     layui.use(['table', 'form'], function () {
         var table = layui.table;
         var form = layui.form;
+
         form.on('submit(sreach)', function (data) {
             table.reload('roleReload', {
                 where: data.field //设定异步数据接口的额外参数
@@ -56,14 +73,18 @@
         });
         //方法级渲染
         table.render({
-            elem: '#table_role'
-            , url: 'queryRole'
+            elem: '#table_user'
+            , url: 'queryAdminUser'
             , cols: [[
-                {field: 'roleName', title: '角色名', width: 180},
-                {field: 'roleDiscription', title: '描述', width: 180},
+                {field: 'username', title: '登录名', width: 180},
+                {field: 'nikeName', title: '昵称', width: 180},
+                {field: 'phone', title: '手机号码', width: 180},
+                {field: 'email', title: '邮箱', width: 180},
+                {field: 'createTime', title: '加入时间', width: 180},
                 {field: 'status', title: '状态', width: 80, toolbar: '#barDemo2'},
                 {title: '操作', width: 220, align: 'center', toolbar: '#barDemo'}
-            ]]
+            ]],
+            page: true
             , id: 'roleReload'
             , where: $("form").serializeJson()
             , height: 'auto'
@@ -75,7 +96,7 @@
             if (obj.event === 'del') {
                 layer.confirm('真的删除行么', function (index) {
                     $.ajax({
-                        url: 'role?ids=' + data.roleId,
+                        url: 'user?ids=' + data.id,
                         type: 'DELETE',
                         success: function (result) {
                             table.reload('roleReload', {
@@ -86,13 +107,13 @@
                     })
                 });
             } else if (obj.event === 'edit') {
-                x_admin_show('修改角色', 'role.html?id=' + data.roleId);
+                x_admin_show('修改角色', 'user.html?id=' + data.id);
             } else if (obj.event === 'stop') {
                 //prompt层
                 if (data.status == '0') {
                     layer.confirm('确认停用吗？', function (index) {
                         $.ajax({
-                            url: 'stopRole?status=1&id=' + data.roleId,
+                            url: 'stopAdminUser?status=1&id=' + data.id,
                             type: 'PUT',
                             success: function (result) {
                                 layer.msg('已停用!', {icon: 5, time: 1000});
@@ -107,7 +128,7 @@
                     layer.confirm('确认启用吗？', function (index) {
 
                         $.ajax({
-                            url: 'stopRole?status=0&id=' + data.roleId,
+                            url: 'stopAdminUser?status=0&id=' + data.id,
                             type: 'PUT',
                             success: function (result) {
                                 layer.msg('已启用!', {icon: 5, time: 1000});

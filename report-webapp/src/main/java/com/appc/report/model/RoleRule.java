@@ -31,46 +31,46 @@ public class RoleRule implements Serializable {
      */
     @Id
     @Where
-    private Integer id;
+    private Long id;
 
     /**
      *
      */
 
     @Where
-    private Integer roleId;
+    private Long roleId;
 
     /**
      *
      */
 
     @Where
-    private Integer ruleId;
+    private Long ruleId;
 
     private Rule rule;
 
     @GeneratedValue()
-    public Integer getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(Integer id) {
+    public void setId(Long id) {
         this.id = id;
     }
 
-    public Integer getRoleId() {
+    public Long getRoleId() {
         return roleId;
     }
 
-    public void setRoleId(Integer roleId) {
+    public void setRoleId(Long roleId) {
         this.roleId = roleId;
     }
 
-    public Integer getRuleId() {
+    public Long getRuleId() {
         return ruleId;
     }
 
-    public void setRuleId(Integer ruleId) {
+    public void setRuleId(Long ruleId) {
         this.ruleId = ruleId;
     }
 

@@ -33,7 +33,7 @@ public class Role implements Serializable {
      */
     @Id
     @Where
-    private Integer roleId;
+    private Long roleId;
 
     /**
      * 角色名称
@@ -68,11 +68,11 @@ public class Role implements Serializable {
     private List<RoleRule> roleRules;
 
     @GeneratedValue()
-    public Integer getRoleId() {
+    public Long getRoleId() {
         return roleId;
     }
 
-    public void setRoleId(Integer roleId) {
+    public void setRoleId(Long roleId) {
         this.roleId = roleId;
     }
 

@@ -10,5 +10,6 @@ import com.appc.report.model.AdminUser;
  * @date	: 2017-9-14 
  */
 public interface AdminUserService    extends CommonService<AdminUser>{
-	
-	 }
+
+    void save(AdminUser user);
+}
