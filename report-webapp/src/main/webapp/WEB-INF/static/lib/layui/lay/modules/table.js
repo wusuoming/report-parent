@@ -527,8 +527,8 @@ layui.define(['laytpl', 'laypage', 'layer', 'form'], function (exports) {
             return hint.error('Table modules: Did not match to field');
         }
         if (config.page) {
-            that.pullData(that.page);
             config.initSort = {field: field, type: type};
+            that.pullData(that.page);
             return;
         }
         //记录排序索引和类型

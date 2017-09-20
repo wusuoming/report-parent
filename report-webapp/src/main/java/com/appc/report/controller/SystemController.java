@@ -53,7 +53,7 @@ public class SystemController {
             mv.addObject("error_message", SpringUtils.getLocalMessage("010002"));
         } else if (!user.getPassword().equals(MD5Util.getMD5String(password))) {
             mv.addObject("error_message", SpringUtils.getLocalMessage("010003"));
-        } else if (user.getStatus().equals("1")) {
+        } else if ("1".equals(user.getStatus())) {
             mv.addObject("error_message", SpringUtils.getLocalMessage("010017"));
         } else {
             session.setAttribute(ReportConstants.SESSION_KEY, user);
