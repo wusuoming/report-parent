@@ -1,5 +1,6 @@
 package com.appc.report.controller;
 
+import basic.common.core.utils.NameUtils;
 import com.appc.framework.mybatis.executor.criteria.Criteria;
 import com.appc.framework.mybatis.executor.criteria.EntityCriteria;
 import com.appc.report.dto.PageDto;
@@ -134,9 +135,21 @@ public class AdminController {
 
     @RequestMapping(value = "queryRule", method = RequestMethod.GET)
     @ResponseBody
-    public PageDto queryRule(@RequestParam int page, @RequestParam int limit, @RequestParam(required = false) String ruleName, @RequestParam(required = false) Long ruleType, @RequestParam(required = false) Long ruleCate) {
-        Sort sortObj = new Sort(new Sort.Order(Sort.Direction.DESC, "pay_time"));
-        Pageable pageable = new PageRequest(page - 1, limit, null);
+    public PageDto queryRule(@RequestParam int page,
+                             @RequestParam int limit,
+                             @RequestParam(required = false) String ruleName,
+                             @RequestParam(required = false) Long ruleType,
+                             @RequestParam(required = false) Long ruleCate,
+                             @RequestParam(required = false) String sort,
+                             @RequestParam(required = false) String order) {
+        Sort sortObj = null;
+        if (!StringUtils.isEmpty(order)) {
+            if (!StringUtils.isEmpty(sort)) {
+                sort = NameUtils.toUnderlineName(sort);
+            }
+            sortObj = new Sort(new Sort.Order(Sort.Direction.fromString(order), sort));
+        }
+        Pageable pageable = new PageRequest(page - 1, limit, sortObj);
         Criteria criteria = EntityCriteria.build();
         if (!StringUtils.isEmpty(ruleName)) {
             criteria.like("rule_name", ruleName);
