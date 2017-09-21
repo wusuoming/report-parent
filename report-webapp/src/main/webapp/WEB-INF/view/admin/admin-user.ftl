@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>欢迎页面-X-admin2.0</title>
+    <title>报表管理系统-用户保存</title>
     <meta name="renderer" content="webkit">
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
     <meta name="viewport"
@@ -123,8 +123,8 @@
         //自定义验证规则
         form.verify({
             nikeName: function (value) {
-                if (value.length < 4) {
-                    return '昵称至少得5个字符啊';
+                if (value.length < 2) {
+                    return '昵称至少得2个字符啊';
                 }
             }
             , password: function (value) {

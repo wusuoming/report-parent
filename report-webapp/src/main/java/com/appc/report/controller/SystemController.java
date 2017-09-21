@@ -5,7 +5,11 @@ import basic.common.core.utils.SpringUtils;
 import com.appc.framework.mybatis.executor.criteria.EntityCriteria;
 import com.appc.report.common.ReportConstants;
 import com.appc.report.model.AdminUser;
+import com.appc.report.model.Rule;
+import com.appc.report.model.RuleCate;
 import com.appc.report.service.AdminUserService;
+import com.appc.report.service.RuleCateService;
+import com.appc.report.service.RuleService;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -17,6 +21,8 @@ import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
+import java.util.ArrayList;
+import java.util.List;
 
 
 @Controller
@@ -24,6 +30,12 @@ public class SystemController {
 
     @Autowired
     private AdminUserService adminUserService;
+
+    @Autowired
+    private RuleService ruleService;
+    @Autowired
+    private RuleCateService ruleCateService;
+
     @Autowired
     private HttpServletRequest request;
 
@@ -57,6 +69,26 @@ public class SystemController {
             mv.addObject("error_message", SpringUtils.getLocalMessage("010017"));
         } else {
             session.setAttribute(ReportConstants.SESSION_KEY, user);
+            List<Rule> menuList = ruleService.getMenuList(user.getId());
+            List<RuleCate> ruleCates = new ArrayList<>();
+            for (Rule rule : menuList) {
+                RuleCate parent = null;
+                for (RuleCate ruleCate : ruleCates) {
+                    if (rule.getRuleCate().equals(ruleCate.getCateId())) {
+                        parent = ruleCate;
+                        break;
+                    }
+                }
+                if (parent == null) {
+                    parent = ruleCateService.getById(rule.getRuleCate());
+                    parent.setRules(new ArrayList<>());
+                    ruleCates.add(parent);
+                }
+                parent.getRules().add(rule);
+
+            }
+            session.setAttribute(ReportConstants.SESSION_MENU, ruleCates);
+
             mv = new ModelAndView("redirect:index.html");//指定视图
         }
         return mv;

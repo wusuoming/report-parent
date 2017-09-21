@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.appc.report.dao.RuleDao">
+    <select id="getMenuList" resultType="com.appc.report.model.Rule">
+           SELECT r.* from user_role ur,role_rule rr,rule r where ur.role_id=rr.role_id and rr.rule_id = r.rule_id and ur.user_id = #{userId}
+    </select>
+</mapper>

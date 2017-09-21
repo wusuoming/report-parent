@@ -4,14 +4,8 @@ import basic.common.core.utils.NameUtils;
 import com.appc.framework.mybatis.executor.criteria.Criteria;
 import com.appc.framework.mybatis.executor.criteria.EntityCriteria;
 import com.appc.report.dto.PageDto;
-import com.appc.report.model.AdminUser;
-import com.appc.report.model.Role;
-import com.appc.report.model.Rule;
-import com.appc.report.model.RuleCate;
-import com.appc.report.service.AdminUserService;
-import com.appc.report.service.RoleService;
-import com.appc.report.service.RuleCateService;
-import com.appc.report.service.RuleService;
+import com.appc.report.model.*;
+import com.appc.report.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -41,6 +35,9 @@ public class AdminController {
 
     @Autowired
     private AdminUserService adminUserService;
+
+    @Autowired
+    private CommonRegionService commonRegionService;
     @Autowired
     private RuleCateService ruleCateService;
 
@@ -52,6 +49,7 @@ public class AdminController {
         return mv;
     }
 
+
     @RequestMapping(value = "rule-cate", method = RequestMethod.GET)
     public ModelAndView cate() {
         ModelAndView mv = new ModelAndView("admin/admin-rule-cate");
@@ -62,6 +60,31 @@ public class AdminController {
     public ModelAndView userList() {
         ModelAndView mv = new ModelAndView("admin/admin-user-list");
         return mv;
+    }
+
+    @RequestMapping(value = "region-list", method = RequestMethod.GET)
+    public ModelAndView regionList() {
+        ModelAndView mv = new ModelAndView("admin/admin-region-list");
+        return mv;
+    }
+
+    @RequestMapping(value = "region", method = RequestMethod.GET)
+    public ModelAndView region(@RequestParam(required = false) Long id, @RequestParam(required = false) Long parentId) {
+        ModelAndView mv = new ModelAndView("admin/admin-region");
+        CommonRegion region = commonRegionService.getById(id);
+        if (region != null) {
+            mv.addObject("region", region);
+            mv.addObject("parentRegion", commonRegionService.getById(region.getParentRegionId()));
+        } else {
+            mv.addObject("parentRegion", commonRegionService.getById(parentId));
+        }
+        return mv;
+    }
+
+    @RequestMapping(value = "queryRegion", method = RequestMethod.POST)
+    @ResponseBody
+    public List<CommonRegion> queryRegion(@RequestParam(required = false, defaultValue = "") String id) {
+        return commonRegionService.getEntityList(EntityCriteria.build().eq("parent_region_id", id).buildSort(new Sort(new Sort.Order(Sort.Direction.ASC, "common_region_id"))));
     }
 
     @RequestMapping(value = "role-list", method = RequestMethod.GET)
@@ -213,11 +236,23 @@ public class AdminController {
 
     @RequestMapping(value = "queryAdminUser", method = RequestMethod.GET)
     @ResponseBody
-    public PageDto queryAdminUser(@RequestParam(required = false) String username,
+    public PageDto queryAdminUser(@RequestParam int page,
+                                  @RequestParam int limit,
+                                  @RequestParam(required = false) String username,
                                   @RequestParam(required = false) String nikeName,
                                   @RequestParam(required = false) String phone,
                                   @RequestParam(required = false) String email,
-                                  @RequestParam(required = false) String status) {
+                                  @RequestParam(required = false) String status,
+                                  @RequestParam(required = false) String sort,
+                                  @RequestParam(required = false) String order) {
+        Sort sortObj = null;
+        if (!StringUtils.isEmpty(order)) {
+            if (!StringUtils.isEmpty(sort)) {
+                sort = NameUtils.toUnderlineName(sort);
+            }
+            sortObj = new Sort(new Sort.Order(Sort.Direction.fromString(order), sort));
+        }
+        Pageable pageable = new PageRequest(page - 1, limit, sortObj);
         Criteria criteria = EntityCriteria.build().ne("status", "-1");
         if (!StringUtils.isEmpty(nikeName)) {
             criteria.like("nike_name", nikeName);
@@ -234,9 +269,9 @@ public class AdminController {
         if (!StringUtils.isEmpty(status)) {
             criteria.eq("status", status);
         }
-        List<AdminUser> users = adminUserService.getEntityList(criteria);
+        Page<AdminUser> users = adminUserService.getEntityListForPage(criteria, pageable);
 
-        return PageDto.create((long) users.size(), users);
+        return PageDto.create(users.getTotalElements(), users.getContent());
     }
 
     @RequestMapping(value = "role", method = RequestMethod.DELETE)

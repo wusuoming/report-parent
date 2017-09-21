@@ -10,8 +10,11 @@ import com.appc.report.model.RoleRule;
 import com.appc.report.service.RoleService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 /**
  * RoleServiceImpl
@@ -39,10 +42,17 @@ public class RoleServiceImpl extends CommonServiceImpl<Role, RoleDao> implements
             role.setStatus("0");
             insert(role);
         }
-        for (RoleRule roleRule : role.getRoleRules()) {
-            roleRule.setRoleId(role.getRoleId());
+        if (!CollectionUtils.isEmpty(role.getRoleRules())) {
+            List<RoleRule> roleRules = new ArrayList<>();
+            for (RoleRule roleRule : role.getRoleRules()) {
+                roleRule.setRoleId(role.getRoleId());
+                if (roleRule.getRuleId() != null) {
+                    roleRules.add(roleRule);
+                }
+            }
+            roleRuleDao.insertBatch(roleRules);
+
         }
-        roleRuleDao.insertBatch(role.getRoleRules());
     }
 
     @Override

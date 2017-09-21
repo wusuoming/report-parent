@@ -27,8 +27,8 @@
         <form class="layui-form layui-col-md12 x-so layui-form-pane">
             <input class="layui-input" placeholder="用户名" name="username">
             <input class="layui-input" placeholder="昵称" name="nikeName">
-            <input class="layui-input" type="tel" placeholder="手机" name="phone"  />
-            <input class="layui-input" type="email" placeholder="邮箱" name="email"  />
+            <input class="layui-input" type="tel" placeholder="手机" name="phone"/>
+            <input class="layui-input" type="email" placeholder="邮箱" name="email"/>
             <div class="layui-input-inline">
                 <select name="status">
                     <option value="">状态</option>
@@ -76,11 +76,11 @@
             elem: '#table_user'
             , url: 'queryAdminUser'
             , cols: [[
-                {field: 'username', title: '登录名', width: 180},
-                {field: 'nikeName', title: '昵称', width: 180},
-                {field: 'phone', title: '手机号码', width: 180},
+                {field: 'username', title: '登录名', width: 120},
+                {field: 'nikeName', title: '昵称', width: 120},
+                {field: 'phone', title: '手机号码', width: 120},
                 {field: 'email', title: '邮箱', width: 180},
-                {field: 'createTime', title: '加入时间', width: 180},
+                {field: 'createTime', title: '加入时间', width: 180, sort: true},
                 {field: 'status', title: '状态', width: 80, toolbar: '#barDemo2'},
                 {title: '操作', width: 220, align: 'center', toolbar: '#barDemo'}
             ]],

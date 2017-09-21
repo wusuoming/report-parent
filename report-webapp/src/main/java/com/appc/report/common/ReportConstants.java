@@ -31,6 +31,9 @@ public interface ReportConstants {
 
     final String SESSION_KEY = "user";
 
+    final String SESSION_MENU = "menu";
+
+
     final String REQUEST_ARGUMENT = "requestArgument";
 
     public static Integer DATA_TYPE_CHAR = 0; // 字符型

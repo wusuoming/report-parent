@@ -5,6 +5,8 @@ import com.appc.report.model.Rule;
 import com.appc.report.service.RuleService;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 /**
  * RuleServiceImpl
  *
@@ -16,4 +18,8 @@ import org.springframework.stereotype.Service;
 public class RuleServiceImpl extends CommonServiceImpl<Rule, RuleDao> implements RuleService {
 
 
+    @Override
+    public List<Rule> getMenuList(Long userId) {
+        return baseDao.getMenuList(userId);
+    }
 }

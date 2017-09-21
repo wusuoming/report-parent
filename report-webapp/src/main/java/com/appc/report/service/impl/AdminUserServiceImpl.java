@@ -10,7 +10,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 /**
  * AdminUserServiceImpl
@@ -37,10 +39,12 @@ public class AdminUserServiceImpl extends CommonServiceImpl<AdminUser, AdminUser
             insert(user);
         }
         if (!CollectionUtils.isEmpty(user.getUserRoles())) {
+            List<UserRole> userRoleList = new ArrayList<>();
             for (UserRole userRole : user.getUserRoles()) {
                 userRole.setUserId(user.getId());
+                if (userRole.getRoleId() != null) userRoleList.add(userRole);
             }
-            userRoleDao.insertBatch(user.getUserRoles());
+            userRoleDao.insertBatch(userRoleList);
 
         }
     }

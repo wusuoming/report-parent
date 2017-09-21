@@ -20,6 +20,7 @@ import org.springframework.http.converter.json.MappingJacksonValue;
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.lang.reflect.Type;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -61,9 +62,15 @@ public class SimpleHttpMessageConverter extends MappingJackson2HttpMessageConver
             returnValue.put("code", "0");
             returnValue.put("message", "操作成功");
             if (object != null) {
-                BeanMap beanMap = BeanMap.create(object);
-                for (Object key : beanMap.keySet()) {
-                    returnValue.put(key + "", beanMap.get(key));
+                if (object instanceof Collection) {
+                    returnValue.put("data", object);
+                    returnValue.put("count", ((Collection) object).size());
+
+                } else {
+                    BeanMap beanMap = BeanMap.create(object);
+                    for (Object key : beanMap.keySet()) {
+                        returnValue.put(key + "", beanMap.get(key));
+                    }
                 }
             }
             object = returnValue;

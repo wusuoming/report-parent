@@ -32,12 +32,12 @@
     </div>
     <ul class="layui-nav right" lay-filter="">
         <li class="layui-nav-item">
-            <a href="javascript:;">admin</a>
+            <a href="javascript:;">${user.nikeName}</a>
             <dl class="layui-nav-child">
                 <!-- 二级菜单 -->
-                <dd>
-                    <a onclick="x_admin_show('个人信息','http://www.baidu.com')">个人信息</a>
-                </dd>
+            <#--<dd>-->
+            <#--<a onclick="x_admin_show('个人信息','http://www.baidu.com')">个人信息</a>-->
+            <#--</dd>-->
                 <dd>
                     <a onclick="x_admin_show('修改密码','password.html')">修改密码</a>
                 </dd>
@@ -57,99 +57,29 @@
         <ul id="nav">
             <li>
                 <a _href="./welcome.html">
-                    <i class="iconfont">&#xe6a7;</i>
+                    <i class="layui-icon">&#xe62a;</i>
                     <cite>我的桌面</cite>
-                </a></li>
+                </a>
+            </li>
+        <#list menu as ruleCate>
             <li>
                 <a href="javascript:;">
-                    <i class="iconfont">&#xe726;</i>
-                    <cite>管理员管理</cite>
+                    <i class="layui-icon">&#xe62a;</i>
+                    <cite>${ruleCate.cateName}</cite>
                     <i class="iconfont nav_right">&#xe697;</i>
                 </a>
                 <ul class="sub-menu">
-                    <li>
-                        <a _href="admin/user-list.html">
-                            <i class="iconfont">&#xe6a7;</i>
-                            <cite>管理员列表</cite>
-                        </a>
-                    </li>
-                    <li>
-                        <a _href="admin/role-list.html">
-                            <i class="iconfont">&#xe6a7;</i>
-                            <cite>角色管理</cite>
-                        </a>
-                    </li>
-                    <li>
-                        <a _href="admin/rule-cate.html">
-                            <i class="iconfont">&#xe6a7;</i>
-                            <cite>权限分类</cite>
-                        </a>
-                    </li>
-                    <li>
-                        <a _href="admin/rule-list.html">
-                            <i class="iconfont">&#xe6a7;</i>
-                            <cite>权限管理</cite>
-                        </a>
-                    </li>
+                    <#list ruleCate.rules as rule>
+                        <li>
+                            <a _href="${rule.ruleExpression}">
+                                <i class="iconfont">&#xe6a7;</i>
+                                <cite>${rule.ruleName}</cite>
+                            </a>
+                        </li>
+                    </#list>
                 </ul>
             </li>
-            <li>
-                <a href="javascript:;">
-                    <i class="iconfont">&#xe6ce;</i>
-                    <cite>系统统计</cite>
-                    <i class="iconfont nav_right">&#xe697;</i>
-                </a>
-                <ul class="sub-menu">
-                    <li>
-                        <a _href="echart/echarts1.html">
-                            <i class="iconfont">&#xe6a7;</i>
-                            <cite>拆线图</cite>
-                        </a>
-                    </li>
-                    <li>
-                        <a _href="echart/echarts2.html">
-                            <i class="iconfont">&#xe6a7;</i>
-                            <cite>柱状图</cite>
-                        </a>
-                    </li>
-                    <li>
-                        <a _href="echart/echarts3.html">
-                            <i class="iconfont">&#xe6a7;</i>
-                            <cite>地图</cite>
-                        </a>
-                    </li>
-                    <li>
-                        <a _href="echart/echarts4.html">
-                            <i class="iconfont">&#xe6a7;</i>
-                            <cite>饼图</cite>
-                        </a>
-                    </li>
-                    <li>
-                        <a _href="echart/echarts5.html">
-                            <i class="iconfont">&#xe6a7;</i>
-                            <cite>雷达图</cite>
-                        </a>
-                    </li>
-                    <li>
-                        <a _href="echart/echarts6.html">
-                            <i class="iconfont">&#xe6a7;</i>
-                            <cite>k线图</cite>
-                        </a>
-                    </li>
-                    <li>
-                        <a _href="echart/echarts7.html">
-                            <i class="iconfont">&#xe6a7;</i>
-                            <cite>热力图</cite>
-                        </a>
-                    </li>
-                    <li>
-                        <a _href="echart/echarts8.html">
-                            <i class="iconfont">&#xe6a7;</i>
-                            <cite>仪表图</cite>
-                        </a>
-                    </li>
-                </ul>
-            </li>
+        </#list>
         </ul>
     </div>
 </div>
