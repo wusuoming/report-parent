@@ -81,6 +81,14 @@ public class AdminController {
         return mv;
     }
 
+    @RequestMapping(value = "region", method = RequestMethod.POST)
+    public ModelAndView regionPost(CommonRegion commonRegion) {
+        ModelAndView mv = new ModelAndView("admin/admin-role");
+        commonRegionService.save(commonRegion);
+        mv.addObject("success", true);
+        return mv;
+    }
+
     @RequestMapping(value = "queryRegion", method = RequestMethod.POST)
     @ResponseBody
     public List<CommonRegion> queryRegion(@RequestParam(required = false, defaultValue = "") String id) {

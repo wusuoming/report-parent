@@ -9,7 +9,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Table;
 import java.io.Serializable;
@@ -18,9 +17,9 @@ import java.util.Date;
 /**
  * CommonRegion
  *
+ * @author : panda
  * @version : Ver 1.0
- * @author    : panda
- * @date    : 2017-9-14
+ * @date : 2017-9-14
  */
 @Entity
 @Table
@@ -39,7 +38,7 @@ public class CommonRegion implements Serializable {
      */
     @Id
     @Where
-    @Getter(onMethod = @__({@GeneratedValue(), @ApiModelProperty("")}))
+    @Getter(onMethod = @__({@ApiModelProperty("")}))
     @Setter(onMethod = @__({@ApiModelProperty("")}))
     private java.lang.String commonRegionId;
 

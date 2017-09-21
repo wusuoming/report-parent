@@ -10,5 +10,6 @@ import com.appc.report.model.CommonRegion;
  * @date	: 2017-9-14 
  */
 public interface CommonRegionService    extends CommonService<CommonRegion>{
-	
-	 }
+
+    void save(CommonRegion commonRegion);
+}
