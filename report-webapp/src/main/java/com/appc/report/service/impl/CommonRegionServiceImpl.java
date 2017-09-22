@@ -43,7 +43,7 @@ public class CommonRegionServiceImpl extends CommonServiceImpl<CommonRegion, Com
                 || (!StringUtils.isEmpty(commonRegion.getParentRegionId()) && commonRegion.getParentRegionId().equals(dbCommonRegion.getParentRegionId()))
                 || (!StringUtils.isEmpty(dbCommonRegion.getParentRegionId()) && dbCommonRegion.getParentRegionId().equals(commonRegion.getParentRegionId())))) {
             if (getEntityCount(EntityCriteria.build().eq("parent_region_id", commonRegion.getCommonRegionId())) > 0) {
-                throw new BaseException("201001", "存在下级，不允许调整上下级");
+                throw new BaseException("020004");
             }
         }
     }

@@ -42,13 +42,17 @@
                 上级机构
             </label>
             <div class="layui-input-inline" style="width: 250px;">
-                <input type="text" style="float: left;width: 190px;" id="L_parentRegionName" name="parentRegionName" value="${parentRegion.regionName}"
+                <input type="text" style="float: left;width: 190px;" id="L_parentRegionName" name="parentRegionName"
+                       value="${parentRegion.regionName}"
                        readonly
                        onclick="showMenu(); return false;"
-                       class="layui-input"/><button class="layui-btn layui-btn-small" type="button" style="float: left;margin-left: 10px;" onclick="$('#L_parentRegionId').val('');$('#L_parentRegionName').val('');"><i class="layui-icon"></i></button>
+                       class="layui-input"/>
+                <button class="layui-btn layui-btn-small" type="button" style="float: left;margin-left: 10px;"
+                        onclick="$('#L_parentRegionId').val('');$('#L_parentRegionName').val('');"><i
+                        class="layui-icon"></i></button>
                 <input type="hidden" id="L_parentRegionId" name="parentRegionId"
                        value="${parentRegion.commonRegionId}"/>
-                            </div>
+            </div>
             <div id="menuContent" class="menuContent" style="display:none; position: absolute;z-index: 999999;">
                 <ul id="tree" class="ztree"
                     style="  border: 1px solid #617775;background: #f0f6e4 none repeat scroll 0 0;margin-top:0; width:240px;z-index: 999999"></ul>
@@ -87,7 +91,7 @@
             var index = parent.layer.getFrameIndex(window.name);
             //关闭当前frame
             parent.layer.close(index);
-            parent.location.reload(true);
+            parent.refreshNode('${commonRegionId}');
         });
     </#if>
         $ = layui.jquery;
@@ -118,7 +122,7 @@
                     onClick: clickNode,
                     onDblClick: function (e, treeId, treeNode) {
                         hideMenu();
-                        $("#L_parentRegionId").val(treeNode.commomRegionId);
+                        $("#L_parentRegionId").val(treeNode.commonRegionId);
                         $("#L_parentRegionName").val(treeNode.regionName);
                     }
                 }

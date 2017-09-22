@@ -62,10 +62,21 @@
     function clickNode(e, treeId, treeNode) {
         var zTree = $.fn.zTree.getZTreeObj(treeId);
         zTree.expandNode(treeNode);
-        var table = layui.table;
-        layui.use(['table'], function () {
+        loadTableData(treeNode.children, treeNode);
+    }
+
+    var loadTableData = function (datas, node) {
+        var array = new Array();
+//        if (node) {
+//            array.push(node);
+//        }
+        $(datas).each(function (index, data) {
+            array.push(data);
+        });
+        layui.use(['table', 'form'], function () {
+            var table = layui.table;
             table.reload("ruleReload", { //其它参数在此省略
-                data: treeNode.children //赋值数据
+                data: array //赋值数据
             });
         });
     }
@@ -76,12 +87,7 @@
             row.isParent = true;
         });
         var data = responseData.data;
-        layui.use(['table', 'form'], function () {
-            var table = layui.table;
-            table.reload("ruleReload", { //其它参数在此省略
-                data: data //赋值数据
-            });
-        });
+        loadTableData(data, parentNode);
         return data;
     };
 
@@ -121,13 +127,16 @@
             if (obj.event === 'del') {
                 layer.confirm('真的删除行么', function (index) {
                     $.ajax({
-                        url: 'region?ids=' + data.commonRegionId,
+                        url: 'region?id=' + data.commonRegionId,
                         type: 'DELETE',
                         success: function (result) {
-                            table.reload('ruleReload', {
-                                where: $("form").serializeJson() //设定异步数据接口的额外参数
-                            });
-                            layer.close(index);
+                            if (result && result.code != 0) {
+                                layer.alert(result.message, {icon: 5});
+                            } else {
+                                layer.alert("删除成功", {icon: 6});
+                                layer.close(index);
+                                refreshNode();
+                            }
                         }
                     })
                     ;
@@ -140,6 +149,28 @@
 
     });
 
+    /**
+     * 刷新当前节点
+     */
+    function refreshNode(id) {
+        /*根据 treeId 获取 zTree 对象*/
+        var zTree = $.fn.zTree.getZTreeObj("tree"),
+                type = "refresh",
+                silent = false,
+                /*获取 zTree 当前被选中的节点数据集合*/
+                nodes = zTree.getSelectedNodes();
+        /*强行异步加载父节点的子节点。[setting.async.enable = true 时有效]*/
+        try {
+            if (id == nodes[0].commonRegionId) {
+                zTree.reAsyncChildNodes(nodes[0], type, silent)
+            } else {
+                location.reload(true);
+            }
+        } catch (error) {
+            location.reload(true);
+        }
+
+    }
 </SCRIPT>
 <script type="text/html" id="barDemo">
     <a class="layui-btn layui-btn-mini" lay-event="edit"><i class="layui-icon">&#xe642;</i>编辑</a>

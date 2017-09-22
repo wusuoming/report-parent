@@ -25,4 +25,10 @@ public class HomeController {
         mv.addObject("informationStatistics", statisticsService.informationStatistics());
         return mv;
     }
+
+    @RequestMapping(value = {"/error"}, method = RequestMethod.GET)
+    public ModelAndView error() {
+        ModelAndView mv = new ModelAndView("error/404");//指定视图
+        return mv;
+    }
 }

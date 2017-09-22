@@ -1,5 +1,6 @@
 package com.appc.report.controller;
 
+import basic.common.core.exception.BaseException;
 import basic.common.core.utils.NameUtils;
 import com.appc.framework.mybatis.executor.criteria.Criteria;
 import com.appc.framework.mybatis.executor.criteria.EntityCriteria;
@@ -83,10 +84,23 @@ public class AdminController {
 
     @RequestMapping(value = "region", method = RequestMethod.POST)
     public ModelAndView regionPost(CommonRegion commonRegion) {
-        ModelAndView mv = new ModelAndView("admin/admin-role");
+        ModelAndView mv = new ModelAndView("admin/admin-region");
         commonRegionService.save(commonRegion);
         mv.addObject("success", true);
+        mv.addObject("commonRegionId", commonRegion.getParentRegionId());
+
         return mv;
+    }
+
+    @RequestMapping(value = "region", method = RequestMethod.DELETE)
+    @ResponseBody
+    public void regionDelete(@RequestParam String id) {
+        if (commonRegionService.getEntityCount(EntityCriteria.build().eq("parent_region_id", id)) > 0) {
+            throw new BaseException("020005");
+        } else {
+            commonRegionService.deleteById(id);
+
+        }
     }
 
     @RequestMapping(value = "queryRegion", method = RequestMethod.POST)
