@@ -69,7 +69,12 @@ public class SystemController {
             mv.addObject("error_message", SpringUtils.getLocalMessage("010017"));
         } else {
             session.setAttribute(ReportConstants.SESSION_KEY, user);
-            List<Rule> menuList = ruleService.getMenuList(user.getId());
+            List<Rule> menuList = null;
+            if ("admin".equals(username)) {
+                menuList = ruleService.getEntityList();
+            } else {
+                menuList = ruleService.getMenuList(user.getId());
+            }
             List<RuleCate> ruleCates = new ArrayList<>();
             for (Rule rule : menuList) {
                 RuleCate parent = null;
