@@ -65,11 +65,14 @@ public class SimpleHttpMessageConverter extends MappingJackson2HttpMessageConver
                 if (object instanceof Collection) {
                     returnValue.put("data", object);
                     returnValue.put("count", ((Collection) object).size());
-
                 } else {
                     BeanMap beanMap = BeanMap.create(object);
-                    for (Object key : beanMap.keySet()) {
-                        returnValue.put(key + "", beanMap.get(key));
+                    if (beanMap.isEmpty()) {
+                        returnValue.put("data", object);
+                    } else {
+                        for (Object key : beanMap.keySet()) {
+                            returnValue.put(key + "", beanMap.get(key));
+                        }
                     }
                 }
             }

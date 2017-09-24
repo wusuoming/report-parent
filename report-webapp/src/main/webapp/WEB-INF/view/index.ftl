@@ -57,14 +57,14 @@
         <ul id="nav">
             <li>
                 <a _href="./welcome.html">
-                    <i class="layui-icon">&#xe62a;</i>
+                    <i class="layui-icon">&#xe629;</i>
                     <cite>我的桌面</cite>
                 </a>
             </li>
         <#list menu as ruleCate>
             <li>
                 <a href="javascript:;">
-                    <i class="layui-icon">&#xe62a;</i>
+                    <i class="layui-icon">&#xe629;</i>
                     <cite>${ruleCate.cateName}</cite>
                     <i class="iconfont nav_right">&#xe697;</i>
                 </a>
