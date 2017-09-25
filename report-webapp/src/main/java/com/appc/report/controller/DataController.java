@@ -1,13 +1,18 @@
 package com.appc.report.controller;
 
+import basic.common.core.exception.BaseException;
 import basic.common.core.utils.NameUtils;
 import com.alibaba.druid.pool.DruidDataSource;
 import com.appc.framework.mybatis.executor.criteria.Criteria;
 import com.appc.framework.mybatis.executor.criteria.EntityCriteria;
+import com.appc.report.common.enums.CollectionType;
 import com.appc.report.common.enums.DataSourseType;
 import com.appc.report.common.enums.EncodingType;
+import com.appc.report.common.helper.JdbcUrlHelper;
 import com.appc.report.dto.PageDto;
+import com.appc.report.model.DataCollection;
 import com.appc.report.model.DataSource;
+import com.appc.report.service.DataCollectionService;
 import com.appc.report.service.DataSourceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -15,6 +20,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Controller;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -27,7 +33,6 @@ import java.sql.DriverManager;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Objects;
 
 
 @Controller
@@ -36,7 +41,8 @@ public class DataController {
 
     @Autowired
     private DataSourceService dataSourceService;
-
+    @Autowired
+    private DataCollectionService dataCollectionService;
     @Autowired
     private List<DruidDataSource> dataSources;
 
@@ -54,13 +60,18 @@ public class DataController {
     @RequestMapping(value = "testDataSource", method = RequestMethod.POST)
     @ResponseBody
     public boolean testDataSource(DataSource dataSource) {
-        try {
-            Class.forName("com.mysql.jdbc.Driver");
-            DriverManager.getConnection(Objects.requireNonNull(DataSourseType.getTypeByCode(dataSource.getSourceType())).getJdbcUrlHelper().toJdbcUrl(dataSource), dataSource.getDataUsername(), dataSource.getDataPassword());
-            return true;
-        } catch (Exception e) {
-            e.printStackTrace();
+        if (!checkDataSource(dataSource)) {
             return false;
+        } else {
+            try {
+                JdbcUrlHelper jdbcUrlHelper = DataSourseType.getTypeByCode(dataSource.getSourceType()).getJdbcUrlHelper();
+                Class.forName(DataSourseType.getTypeByCode(dataSource.getSourceType()).getJdbcDriver());
+                DriverManager.getConnection(jdbcUrlHelper.toJdbcUrl(dataSource), dataSource.getDataUsername(), dataSource.getDataPassword());
+                return true;
+            } catch (Exception e) {
+                e.printStackTrace();
+                return false;
+            }
         }
     }
 
@@ -81,16 +92,29 @@ public class DataController {
                 dbType.getJdbcUrlHelper().loadUrl(druidDataSource.getUrl(), dataSource);
                 dataSource.setSourceName("当前数据源");
                 dataSource.setCreateTime(new Date());
-                dataSourceList.add(dataSource);
                 druidDataSource.discardConnection(connection);
                 druidDataSource.removeAbandoned();
+                if (!checkDataSource(dataSource)) {
+                    continue;
+                }
+                dataSourceList.add(dataSource);
             } catch (Exception e) {
                 e.printStackTrace();
             }
         }
-        dataSourceService.insertBatch(dataSourceList);
+        if (!CollectionUtils.isEmpty(dataSourceList)) dataSourceService.insertBatch(dataSourceList);
     }
 
+    private boolean checkDataSource(DataSource dataSource) {
+        DataSource queryDataSource = dataSourceService.getEntity(EntityCriteria.build()
+                .eq("source_type", dataSource.getSourceType())
+                .eq("source_ip", dataSource.getSourceIp())
+                .eq("source_port", dataSource.getSourcePort())
+                .eq("data_name", dataSource.getDataName())
+                .eq("data_username", dataSource.getDataUsername())
+                .eq("data_password", dataSource.getDataPassword()));
+        return queryDataSource == null || queryDataSource.getSourceId().equals(dataSource.getSourceId());
+    }
 
     @RequestMapping(value = "source", method = RequestMethod.DELETE)
     @ResponseBody
@@ -150,4 +174,56 @@ public class DataController {
         return PageDto.create(rules.getTotalElements(), rules.getContent());
     }
 
+    @RequestMapping(value = "collection-list", method = RequestMethod.GET)
+    public ModelAndView regionList() {
+        ModelAndView mv = new ModelAndView("data/data-collection-list");
+        return mv;
+    }
+
+    @RequestMapping(value = "queryCollection", method = RequestMethod.POST)
+    @ResponseBody
+    public List<DataCollection> queryCollection(@RequestParam(required = false) Integer id) {
+        if (id == null) {
+            return dataCollectionService.getEntityList(EntityCriteria.build().isNull("parent_id"));
+        } else {
+            return dataCollectionService.getEntityList(EntityCriteria.build().eq("parent_id", id));
+
+        }
+    }
+
+    @RequestMapping(value = "collection", method = RequestMethod.GET)
+    public ModelAndView region(@RequestParam(required = false) Long id, @RequestParam(required = false) Long parentId) {
+        ModelAndView mv = new ModelAndView("data/data-collection");
+        mv.addObject("collectionTypes", CollectionType.values());
+        mv.addObject("dataSources", dataSourceService.getEntityList());
+        DataCollection collection = dataCollectionService.getById(id);
+        if (collection != null) {
+            mv.addObject("collection", collection);
+            mv.addObject("parentCollection", dataCollectionService.getById(collection.getParentId()));
+        } else {
+            mv.addObject("parentCollection", dataCollectionService.getById(parentId));
+        }
+        return mv;
+    }
+
+    @RequestMapping(value = "collection", method = RequestMethod.POST)
+    public ModelAndView regionPost(DataCollection collection) {
+        ModelAndView mv = new ModelAndView("data/data-collection");
+        dataCollectionService.save(collection);
+        mv.addObject("success", true);
+        mv.addObject("collectionId", collection.getParentId());
+
+        return mv;
+    }
+
+    @RequestMapping(value = "collection", method = RequestMethod.DELETE)
+    @ResponseBody
+    public void regionDelete(@RequestParam Long id) {
+        if (dataCollectionService.getEntityCount(EntityCriteria.build().eq("parent_id", id)) > 0) {
+            throw new BaseException("020005");
+        } else {
+            dataCollectionService.deleteById(id);
+
+        }
+    }
 }

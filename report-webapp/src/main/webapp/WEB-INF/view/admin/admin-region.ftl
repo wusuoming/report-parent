@@ -110,8 +110,6 @@
                     url: "queryRegion",
                     autoParam: ["id"],
                     dataFilter: filter
-                }, view: {
-                    dblClickExpand: false//屏蔽掉双击事件
                 }, data: {
                     key: {
                         title: "regionName", name: "regionName"
@@ -130,8 +128,8 @@
     ;
 
     function clickNode(e, treeId, treeNode) {
-        var zTree = $.fn.zTree.getZTreeObj(treeId);
-        zTree.expandNode(treeNode);
+        if (!treeNode.children) $.fn.zTree.getZTreeObj(treeId).expandNode(treeNode);
+
     }
 
     function filter(treeId, parentNode, responseData) {
@@ -150,7 +148,7 @@
 
     function showMenu() {
         var cityObj = $("#L_parentRegionName");
-        var cityOffset = $("#L_parentRegionName").offset();
+        var cityOffset = cityObj.offset();
         $("#menuContent").css({
             left: cityOffset.left + "px",
             top: cityOffset.top + cityObj.outerHeight() + "px"

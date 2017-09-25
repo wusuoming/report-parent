@@ -48,7 +48,7 @@ public class CommonRegionServiceImpl extends CommonServiceImpl<CommonRegion, Com
         }
     }
 
-    void buildParent(CommonRegion commonRegion) {
+    private void buildParent(CommonRegion commonRegion) {
         CommonRegion parent = getById(commonRegion.getParentRegionId());
         if (parent != null) {
             commonRegion.setRegionPath(parent.getRegionPath() + "," + commonRegion.getCommonRegionId());

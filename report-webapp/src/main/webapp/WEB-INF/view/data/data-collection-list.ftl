@@ -32,7 +32,7 @@
         </div>
         <div class="layui-col-md9">
             <xblock>
-                <button class="layui-btn" onclick="x_admin_show('添加机构','region.html')"><i class="layui-icon"></i>添加
+                <button class="layui-btn" onclick="x_admin_show('添加机构','collection.html')"><i class="layui-icon"></i>添加
                 </button>
             </xblock>
             <table class="layui-hide" id="table_rule" lay-filter="rule"></table>
@@ -43,16 +43,17 @@
     var setting = {
         async: {
             enable: true,
-            url: "queryRegion",
+            url: "queryCollection",
             autoParam: ["id"],
             dataFilter: filter
         }, data: {
             key: {
-                title: "regionName", name: "regionName"
+                title: "collectionName", name: "collectionName"
             }
         },
         callback: {
-            onClick: clickNode
+            onClick: clickNode,
+            beforeClick: beforeClick
         }
     };
 
@@ -72,20 +73,35 @@
                 data: array //赋值数据
             });
         });
-    }
+    };
 
     function filter(treeId, parentNode, responseData) {
         $(responseData.data).each(function (index, row) {
-            row.id = row.commonRegionId;
-            row.isParent = true;
+            row.id = row.collectionId;
+            if (!row.collectionType) {
+                row.isParent = true;
+            }
+            else {
+                row.isParent = false;
+                row.isHidden = true
+            }
         });
         var data = responseData.data;
         loadTableData(data, parentNode);
         if (!parentNode) {
-            data = [{"regionName": "全部", "open": true, children: data}];
+            data = [{"collectionName": "全部", "open": true, children: data}];
         }
         return data;
     };
+
+    function beforeClick(treeId, treeNode) {
+        if (treeNode.isParent) {
+            return true;
+        } else {
+            layer.alert("只能选中目录", {icon: 5});
+            return false;
+        }
+    }
 
     $(document).ready(function () {
         $.fn.zTree.init($("#tree"), setting);
@@ -106,9 +122,7 @@
         table.render({
             elem: '#table_rule'
             , cols: [[
-                {field: 'commonRegionId', title: 'ID', width: 60}
-                , {field: 'regionName', title: '名称', width: 120}
-                , {field: 'regionDescription', title: '描述', width: 220}
+                {field: 'collectionName', title: '名称', width: 120}
                 , {field: 'createTime', title: '创建时间', width: 160}
                 , {title: '操作', width: 160, align: 'center', toolbar: '#barDemo'}
             ]]
@@ -123,7 +137,7 @@
             if (obj.event === 'del') {
                 layer.confirm('真的删除行么', function (index) {
                     $.ajax({
-                        url: 'region?id=' + data.commonRegionId,
+                        url: 'collection?id=' + data.collectionId,
                         type: 'DELETE',
                         success: function (result) {
                             if (result && result.code != 0) {
@@ -138,7 +152,7 @@
                     ;
                 });
             } else if (obj.event === 'edit') {
-                x_admin_show('修改机构', 'region.html?id=' + data.commonRegionId);
+                x_admin_show('修改机构', 'collection.html?id=' + data.collectionId);
             }
         });
 
@@ -157,7 +171,7 @@
                 nodes = zTree.getSelectedNodes();
         /*强行异步加载父节点的子节点。[setting.async.enable = true 时有效]*/
         try {
-            if (id == nodes[0].commonRegionId) {
+            if (id == nodes[0].collectionId) {
                 zTree.reAsyncChildNodes(nodes[0], type, silent)
             } else {
                 location.reload(true);
