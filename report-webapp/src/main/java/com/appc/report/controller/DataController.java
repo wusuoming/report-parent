@@ -3,9 +3,11 @@ package com.appc.report.controller;
 import basic.common.core.exception.BaseException;
 import basic.common.core.utils.NameUtils;
 import com.alibaba.druid.pool.DruidDataSource;
+import com.appc.framework.mybatis.common.enums.DBType;
 import com.appc.framework.mybatis.executor.criteria.Criteria;
 import com.appc.framework.mybatis.executor.criteria.EntityCriteria;
 import com.appc.framework.mybatis.route.DBContextHolder;
+import com.appc.report.common.db.PropertyHolder;
 import com.appc.report.common.enums.CollectionType;
 import com.appc.report.common.enums.DataSourseType;
 import com.appc.report.common.enums.EncodingType;
@@ -30,12 +32,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.util.ArrayList;
+import java.sql.*;
+import java.util.*;
 import java.util.Date;
-import java.util.List;
-import java.util.Map;
 
 
 @Controller
@@ -235,11 +234,89 @@ public class DataController {
 
     @RequestMapping(value = "getCollectionStructure", method = RequestMethod.GET)
     @ResponseBody
-    public List<Map> getCollectionStructure(@RequestParam Integer id) {
+    public List getCollectionStructure(@RequestParam Integer id) {
         DataCollection dataCollection = dataCollectionService.getById(id);
         dynamicDataSourceService.putDataSource(dataCollection.getSourceId());
-        System.out.println(DBContextHolder.getDataSource());
+        try {
+            DruidDataSource dataSource = (DruidDataSource) DBContextHolder.getDataSource();
+            Connection connection = dataSource.getConnection();
+            return loadDBColumn(connection, dataCollection.getCollectionValue());
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
         return null;
+    }
+
+    private List loadDBTable(Connection connection) throws SQLException {
+        DatabaseMetaData metaData = connection.getMetaData();
+        //获取数据库类型
+        DBType dbType = DBType.getTypeByCode(connection.getMetaData().getDatabaseProductName());
+        String catalog = connection.getCatalog();
+        String schema = connection.getMetaData().getUserName();
+
+        switch (dbType) {
+            case MYSQL:
+                break;
+            case POSTGRESQL:
+                schema = "%";
+                break;
+            case SQL_SERVER:
+                schema = PropertyHolder.getGeneratorProperty("mssql.schema");
+                break;
+            case ORACLE:
+                schema = schema.toUpperCase();
+                break;
+            default:
+
+        }
+        //获取数据库表
+        ResultSet tables = metaData.getTables(catalog, schema, "%", new String[]{"TABLE"});
+        return resultSetToList(tables);
+
+
+    }
+
+    private List loadDBColumn(Connection connection, String tableName) throws SQLException {
+        DatabaseMetaData metaData = connection.getMetaData();
+        //获取数据库类型
+        DBType dbType = DBType.getTypeByCode(connection.getMetaData().getDatabaseProductName());
+        String schema = connection.getMetaData().getUserName();
+        switch (dbType) {
+            case MYSQL:
+                break;
+            case POSTGRESQL:
+                schema = "%";
+                break;
+            case SQL_SERVER:
+                schema = PropertyHolder.getGeneratorProperty("mssql.schema");
+                break;
+            case ORACLE:
+                schema = schema.toUpperCase();
+                break;
+            default:
+
+        }
+
+
+        ResultSet columns = metaData.getColumns(connection.getCatalog(), schema, tableName, "%");
+        return resultSetToList(columns);
+    }
+
+    private static List resultSetToList(ResultSet rs) throws java.sql.SQLException {
+        if (rs == null)
+            return Collections.EMPTY_LIST;
+        ResultSetMetaData md = rs.getMetaData(); //得到结果集(rs)的结构信息，比如字段数、字段名等
+        int columnCount = md.getColumnCount(); //返回此 ResultSet 对象中的列数
+        List list = new ArrayList();
+        Map rowData = new HashMap();
+        while (rs.next()) {
+            rowData = new HashMap(columnCount);
+            for (int i = 1; i <= columnCount; i++) {
+                rowData.put(md.getColumnName(i), rs.getObject(i));
+            }
+            list.add(rowData);
+        }
+        return list;
     }
 
 }

@@ -138,11 +138,11 @@
                     elem: '#table_collection_structure',
                     url: 'getCollectionStructure?id=' + treeNode.collectionId
                     , cols: [[
-                        {field: 'collectionName', title: '字段名称', width: 120}
-                        , {field: 'createTime', title: '字段描述', width: 160}
-                        , {field: 'createTime', title: '字段类型', width: 160}
-                        , {field: 'createTime', title: '字段长度', width: 160}
-                        , {field: 'createTime', title: '字段精度', width: 160}
+                        {field: 'COLUMN_NAME', title: '字段名称', width: 120}
+                        , {field: 'REMARKS', title: '字段描述', width: 160}
+                        , {field: 'TYPE_NAME', title: '字段类型', width: 160}
+                        , {field: 'COLUMN_SIZE', title: '字段长度', width: 160}
+                        , {field: 'DECIMAL_DIGITS', title: '字段精度', width: 160}
                     ]]
                     , id: 'collectionReload'
                     , where: $("form").serializeJson()
