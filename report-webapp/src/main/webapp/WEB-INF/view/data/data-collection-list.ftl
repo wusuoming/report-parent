@@ -25,17 +25,47 @@
 </head>
 
 <body>
-<div class="x-body  ">
+<div>
     <div class="layui-row">
-        <div class="layui-col-md3">
+        <div class="left-menu">
             <ul id="tree" class="ztree"></ul>
         </div>
-        <div class="layui-col-md9">
-            <xblock>
-                <button class="layui-btn" onclick="x_admin_show('添加机构','collection.html')"><i class="layui-icon"></i>添加
-                </button>
-            </xblock>
-            <table class="layui-hide" id="table_rule" lay-filter="rule"></table>
+        <div class="right-content">
+            <div id="collection">
+                <xblock>
+                    <button class="layui-btn" onclick="x_admin_show('添加机构','collection.html')"><i
+                            class="layui-icon"></i>添加
+                    </button>
+                </xblock>
+                <table class="layui-hide" id="table_collection" lay-filter="collection"></table>
+            </div>
+            <div id="collectionData" style="display: none;">
+                <div class="layui-tab" lay-filter="tab">
+                    <ul class="layui-tab-title">
+                        <li class="layui-this">数据结构</li>
+                        <li>数据内容</li>
+                    </ul>
+                    <div class="layui-tab-content">
+                        <div class="layui-tab-item layui-show">
+                            <table class="layui-hide" id="table_collection_structure"
+                                   lay-filter="collectionStructure"></table>
+                        </div>
+                        <div class="layui-tab-item">
+                            <table class="layui-hide" id="table_collection_data" lay-filter="collectionData"></table>
+                        </div>
+                    </div>
+                </div>
+
+                <script>
+                    //注意：选项卡 依赖 element 模块，否则无法进行功能性操作
+                    layui.use('element', function () {
+                        var element = layui.element;
+                        element.on('tab(tab)', function () {
+                            console.log(this);
+                        });
+                    });
+                </script>
+            </div>
         </div>
     </div>
 </div>
@@ -63,13 +93,13 @@
     }
 
     var loadTableData = function (datas, node) {
-        var array = new Array();
+        var array = [];
         $(datas).each(function (index, data) {
             array.push(data);
         });
         layui.use(['table', 'form'], function () {
             var table = layui.table;
-            table.reload("ruleReload", { //其它参数在此省略
+            table.reload("collectionReload", { //其它参数在此省略
                 data: array //赋值数据
             });
         });
@@ -96,10 +126,30 @@
 
     function beforeClick(treeId, treeNode) {
         if (treeNode.isParent) {
+            $("#collection").show();
+            $("#collectionData").hide();
             return true;
         } else {
-            layer.alert("只能选中目录", {icon: 5});
-            return false;
+            $("#collection").hide();
+            $("#collectionData").show();
+            layui.use(['table'], function () {
+                var table = layui.table;
+                table.render({
+                    elem: '#table_collection_structure',
+                    url: 'getCollectionStructure?id=' + treeNode.collectionId
+                    , cols: [[
+                        {field: 'collectionName', title: '字段名称', width: 120}
+                        , {field: 'createTime', title: '字段描述', width: 160}
+                        , {field: 'createTime', title: '字段类型', width: 160}
+                        , {field: 'createTime', title: '字段长度', width: 160}
+                        , {field: 'createTime', title: '字段精度', width: 160}
+                    ]]
+                    , id: 'collectionReload'
+                    , where: $("form").serializeJson()
+                    , height: 'auto', page: false
+                });
+            });
+            return true;
         }
     }
 
@@ -112,7 +162,7 @@
         var table = layui.table;
         var form = layui.form;
         form.on('submit(sreach)', function (data) {
-            table.reload('ruleReload', {
+            table.reload('collectionReload', {
                 where: data.field //设定异步数据接口的额外参数
             });
 
@@ -120,19 +170,18 @@
         });
         //方法级渲染
         table.render({
-            elem: '#table_rule'
+            elem: '#table_collection'
             , cols: [[
                 {field: 'collectionName', title: '名称', width: 120}
                 , {field: 'createTime', title: '创建时间', width: 160}
                 , {title: '操作', width: 160, align: 'center', toolbar: '#barDemo'}
             ]]
-            , id: 'ruleReload'
-            , where: $("form").serializeJson()
+            , id: 'collectionReload'
             , height: 'auto'
         })
-        ;
+
         //监听工具条
-        table.on('tool(rule)', function (obj) {
+        table.on('tool(collection)', function (obj) {
             var data = obj.data;
             if (obj.event === 'del') {
                 layer.confirm('真的删除行么', function (index) {

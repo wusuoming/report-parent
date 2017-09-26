@@ -25,12 +25,12 @@
 </head>
 
 <body>
-<div class="x-body  ">
+<div>
     <div class="layui-row">
-        <div class="layui-col-md3">
+        <div class="left-menu">
             <ul id="tree" class="ztree"></ul>
         </div>
-        <div class="layui-col-md9">
+        <div class="right-content">
             <xblock>
                 <button class="layui-btn" onclick="x_admin_show('添加机构','region.html')"><i class="layui-icon"></i>添加
                 </button>

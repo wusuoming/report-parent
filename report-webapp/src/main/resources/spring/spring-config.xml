@@ -28,10 +28,15 @@
     </bean>
     <bean id="messageSource"
           class="org.springframework.context.support.ReloadableResourceBundleMessageSource">
-        <property name="cacheSeconds" value="10"></property>
-        <property name="basename">
-            <!-- 定义消息资源文件的相对路径 -->
-            <value>classpath:messages/message</value>
+        <property name="cacheSeconds" value="10"/>
+        <property name="basename" value="classpath:messages/message"/>
+    </bean>
+    <bean id="multipleDataSource" class="com.appc.framework.mybatis.route.DynamicDataSource">
+        <property name="defaultTargetDataSource" ref="rescenterMySQL"/> <!--默认主库-->
+        <property name="targetDataSources">
+            <map>
+                <entry key="local" value-ref="rescenterMySQL"/>
+            </map>
         </property>
     </bean>
     <bean id="rescenterMySQL" class="com.alibaba.druid.pool.DruidDataSource"

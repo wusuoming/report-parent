@@ -5,6 +5,7 @@ import basic.common.core.utils.NameUtils;
 import com.alibaba.druid.pool.DruidDataSource;
 import com.appc.framework.mybatis.executor.criteria.Criteria;
 import com.appc.framework.mybatis.executor.criteria.EntityCriteria;
+import com.appc.framework.mybatis.route.DBContextHolder;
 import com.appc.report.common.enums.CollectionType;
 import com.appc.report.common.enums.DataSourseType;
 import com.appc.report.common.enums.EncodingType;
@@ -14,6 +15,7 @@ import com.appc.report.model.DataCollection;
 import com.appc.report.model.DataSource;
 import com.appc.report.service.DataCollectionService;
 import com.appc.report.service.DataSourceService;
+import com.appc.report.service.DynamicDataSourceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -33,6 +35,7 @@ import java.sql.DriverManager;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 
 @Controller
@@ -45,6 +48,9 @@ public class DataController {
     private DataCollectionService dataCollectionService;
     @Autowired
     private List<DruidDataSource> dataSources;
+
+    @Autowired
+    private DynamicDataSourceService dynamicDataSourceService;
 
 
     @RequestMapping(value = "source", method = RequestMethod.GET)
@@ -226,4 +232,14 @@ public class DataController {
 
         }
     }
+
+    @RequestMapping(value = "getCollectionStructure", method = RequestMethod.GET)
+    @ResponseBody
+    public List<Map> getCollectionStructure(@RequestParam Integer id) {
+        DataCollection dataCollection = dataCollectionService.getById(id);
+        dynamicDataSourceService.putDataSource(dataCollection.getSourceId());
+        System.out.println(DBContextHolder.getDataSource());
+        return null;
+    }
+
 }
