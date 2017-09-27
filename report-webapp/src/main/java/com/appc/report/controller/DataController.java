@@ -265,10 +265,17 @@ public class DataController {
     @RequestMapping(value = "getCollectionData", method = RequestMethod.GET)
     @ResponseBody
     public PageDto getCollectionData(@RequestParam Integer id, @RequestParam int page,
-                                     @RequestParam int limit) {
+                                     @RequestParam int limit,
+                                     @RequestParam(required = false) String sort,
+                                     @RequestParam(required = false) String order) {
+        Sort sortObj = null;
+
+        if (!StringUtils.isEmpty(order)) {
+            sortObj = new Sort(new Sort.Order(Sort.Direction.fromString(order), sort));
+        }
         DataCollection dataCollection = dataCollectionService.getById(id);
         dynamicDataSourceService.putDataSource(dataCollection.getSourceId());
-        Pageable pageable = new PageRequest(page - 1, limit, null);
+        Pageable pageable = new PageRequest(page - 1, limit, sortObj);
         Page result = dynamicDataSourceService.getCollectionData(dataCollection, pageable);
         return PageDto.create(result.getTotalElements(), result.getContent());
     }

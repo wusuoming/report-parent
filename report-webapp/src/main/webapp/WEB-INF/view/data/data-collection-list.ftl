@@ -102,7 +102,7 @@
                         });
                         var fields = [];
                         $(result.data).each(function (index, row) {
-                            fields.push({field: row.COLUMN_NAME, title: row.COLUMN_NAME, width: 120});
+                            fields.push({field: row.COLUMN_NAME, title: row.COLUMN_NAME, width: 160, sort: true});
                         });
 
                         table.render({
