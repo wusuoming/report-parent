@@ -2,9 +2,13 @@ package com.appc.report.common.enums;
 
 public enum CollectionType {
 
-    TABLE("table"), VIEW("view"), COLLECTION("collection"), SQL("sql");
+    TABLE("table"),
+    VIEW("view"),
+//    COLLECTION("collection"),
+    SQL("sql");
 
     private String code;
+    private Integer inputType;
 
     CollectionType(String code) {
         this.code = code;

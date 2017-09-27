@@ -6,6 +6,7 @@ import basic.common.core.id.IdUtil;
 import basic.common.core.utils.IPUtils;
 import basic.common.core.utils.SpringUtils;
 import com.alibaba.druid.support.json.JSONUtils;
+import com.appc.framework.mybatis.route.DBContextHolder;
 import com.appc.report.common.ReportConstants;
 import com.appc.report.model.AdminUser;
 import com.appc.report.model.SystemLog;
@@ -44,6 +45,7 @@ public class LogInterceptor implements MethodInterceptor {
 
 
     public Object invoke(MethodInvocation invocation) throws Throwable {
+        DBContextHolder.putDataSource("local");
         Long startTime = System.currentTimeMillis();
         Long logId = IdUtil.getId();
         Method method = invocation.getMethod();

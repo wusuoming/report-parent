@@ -94,7 +94,7 @@
     <!-- 3.配置SqlSessionFactory对象 -->
     <bean id="sqlSessionFactory" class="com.appc.framework.mybatis.MybatisSqlSessionFactoryBean">
         <!-- 注入数据库连接池 -->
-        <property name="dataSource" ref="rescenterMySQL"/>
+        <property name="dataSource" ref="multipleDataSource"/>
         <!-- 配置MyBaties全局配置文件:mybatis-config.xml -->
         <!--<property name="configLocation" value="classpath:mybatis-config.xml"/>-->
         <property name="configuration" ref="mybatisConfiguration"/>

@@ -69,7 +69,7 @@
                 </label>
                 <div class="layui-input-inline">
                     <div class="layui-input-inline">
-                        <select name="collectionType">
+                        <select name="collectionType" id="selectCollectionType" lay-filter="collectionType">
                             <option value="">目录</option>
                         <#list collectionTypes as collectionType>
                             <option value="${collectionType.code}"
@@ -79,15 +79,15 @@
                     </div>
                 </div>
             </div>
-            <div class="layui-inline">
+            <div class="layui-inline" id="selectSourceId">
                 <label for="L_collectionValue" class="layui-form-label">
                     数据源
                 </label>
                 <div class="layui-input-inline">
                     <div class="layui-input-inline">
-                        <select name="sourceId">
+                        <select name="sourceId" lay-filter="sourceId">
                         <#list dataSources as dataSource>
-                            <option value="${collectionType.sourceId}"
+                            <option value="${dataSource.sourceId}"
                                     <#if dataSource.sourceId==collection.sourceId>selected="selected"</#if>>${dataSource.sourceName}</option>
                         </#list>
                         </select>
@@ -96,24 +96,22 @@
             </div>
 
         </div>
-        <div class="layui-form-item">
+
+        <div class="layui-form-item" id="selectCollectionValue">
             <label for="L_collectionValue" class="layui-form-label">
                 结果集来源
             </label>
-            <div class="layui-input-inline">
-                <textarea type="text" id="L_collectionValue" name="collectionValue"
-                          required class="layui-textarea  "
-                >${collection.collectionValue}</textarea>
+            <div class="layui-input-block" id="v_collectionValue">
+
             </div>
         </div>
         <div class="layui-form-item">
             <label for="L_collectionDescription" class="layui-form-label">
                 描述
             </label>
-            <div class="layui-input-inline">
-                <textarea type="text" id="L_collectionDiscription" name="collectionDiscription"
-                          required class="layui-textarea  "
-                >${collection.collectionDiscription}</textarea>
+            <div class="layui-input-block">
+<textarea type="text" id="L_collectionDescription" name="collectionDescription"
+          required class="layui-textarea  ">${collection.collectionDiscription}</textarea>
             </div>
         </div>
         <div class="layui-form-item">
@@ -147,7 +145,12 @@
         form.on('submit(save)', function (data) {
             return true;
         });
-
+        form.on('select(collectionType)', function (data) {
+            reloadDivStatus(data.value);
+        });
+        form.on('select(sourceId)', function (data) {
+            loadCollectionValue(data.value, $("#selectCollectionType").val());
+        });
 
     });
 
@@ -195,8 +198,59 @@
     };
     $(document).ready(function () {
         $.fn.zTree.init($("#tree"), setting);
-    });
+        var collectionType = $("#selectCollectionType").val();
+        reloadDivStatus(collectionType);
 
+    });
+    var reloadDivStatus = function (collectionType) {
+        if (!collectionType) {
+            $("#selectSourceId").hide();
+            $("#selectCollectionValue").hide();
+
+        } else {
+            $("#selectSourceId").show();
+            $("#selectCollectionValue").show();
+            loadCollectionValue($("#selectSourceId select").val(), collectionType)
+        }
+    }
+    var loadCollectionValue = function (sourceId, collectionType) {
+        $.ajax({
+            url: 'getCollections?id=' + sourceId + "&type=" + collectionType,
+            type: 'get',
+            success: function (result) {
+                $("#v_collectionValue").empty();
+                if (result && result.code == 0) {
+                    var select = $("<select></select>");
+                    select.attr("id", "L_collectionValue");
+                    select.attr("name", "collectionValue");
+                    select.attr("lay-filter", "collectionValue");
+                    select.attr("required", "");
+                    $(result.data).each(function (index, row) {
+                        var option = $("<option></option>");
+                        option.attr("value", row.TABLE_NAME);
+                        option.text(row.TABLE_NAME);
+                    <#if (collection.collectionValue)??>
+                        if (row.TABLE_NAME == '${collection.collectionValue}') option.attr("selected", "selected");
+                    </#if>
+                        select.append(option);
+                    });
+                    $("#v_collectionValue").append(select);
+                    layui.use(['form'], function () {
+                        var form = layui.form;
+                        form.render('select');
+                    });
+                } else {
+                    var textarea = $("<textarea></textarea>");
+                    textarea.attr("id", "L_collectionValue");
+                    textarea.attr("name", "collectionValue");
+                    textarea.attr("required", "");
+                    textarea.attr("class", "layui-textarea");
+                    textarea.val('${collection.collectionValue}');
+                    $("#v_collectionValue").append(textarea);
+                }
+            }
+        })
+    }
 
     function showMenu() {
         var cityObj = $("#L_parentName");

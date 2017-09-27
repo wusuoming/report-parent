@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.appc.report.dao.DataSourceDao">
+    <select id="getCollectionData" resultType="map">
+        <if test="dataCollection.collectionType =='sql' ">
+            ${dataCollection.collectionValue}
+        </if>
+        <if test="dataCollection.collectionType !='sql' ">
+            SELECT * FROM ${dataCollection.collectionValue}
+        </if>
+    </select>
+</mapper>

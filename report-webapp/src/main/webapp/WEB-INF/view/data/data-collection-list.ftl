@@ -25,48 +25,44 @@
 </head>
 
 <body>
-<div>
-    <div class="layui-row">
-        <div class="left-menu">
-            <ul id="tree" class="ztree"></ul>
-        </div>
-        <div class="right-content">
-            <div id="collection">
-                <xblock>
-                    <button class="layui-btn" onclick="x_admin_show('添加机构','collection.html')"><i
-                            class="layui-icon"></i>添加
-                    </button>
-                </xblock>
-                <table class="layui-hide" id="table_collection" lay-filter="collection"></table>
-            </div>
-            <div id="collectionData" style="display: none;">
-                <div class="layui-tab" lay-filter="tab">
-                    <ul class="layui-tab-title">
-                        <li class="layui-this">数据结构</li>
-                        <li>数据内容</li>
-                    </ul>
-                    <div class="layui-tab-content">
-                        <div class="layui-tab-item layui-show">
-                            <table class="layui-hide" id="table_collection_structure"
-                                   lay-filter="collectionStructure"></table>
-                        </div>
-                        <div class="layui-tab-item">
-                            <table class="layui-hide" id="table_collection_data" lay-filter="collectionData"></table>
-                        </div>
-                    </div>
+<div class="left-menu">
+    <ul id="tree" class="ztree"></ul>
+</div>
+<div class="right-content">
+    <div id="collection">
+        <xblock>
+            <button class="layui-btn" onclick="x_admin_show('添加机构','collection.html')"><i
+                    class="layui-icon"></i>添加
+            </button>
+        </xblock>
+        <table class="layui-hide" id="table_collection" lay-filter="collection"></table>
+    </div>
+    <div id="collectionData" style="display: none;">
+        <div class="layui-tab" lay-filter="tab">
+            <ul class="layui-tab-title">
+                <li class="layui-this">数据结构</li>
+                <li>数据内容</li>
+            </ul>
+            <div class="layui-tab-content">
+                <div class="layui-tab-item layui-show">
+                    <table class="layui-hide" id="table_collection_structure"
+                           lay-filter="collectionStructure"></table>
                 </div>
-
-                <script>
-                    //注意：选项卡 依赖 element 模块，否则无法进行功能性操作
-                    layui.use('element', function () {
-                        var element = layui.element;
-                        element.on('tab(tab)', function () {
-                            console.log(this);
-                        });
-                    });
-                </script>
+                <div class="layui-tab-item">
+                    <table class="layui-hide" id="table_collection_data" lay-filter="collectionData"></table>
+                </div>
             </div>
         </div>
+
+        <script>
+            //注意：选项卡 依赖 element 模块，否则无法进行功能性操作
+            layui.use('element', function () {
+                var element = layui.element;
+                element.on('tab(tab)', function () {
+                    console.log(this);
+                });
+            });
+        </script>
     </div>
 </div>
 <SCRIPT type="text/javascript">
@@ -89,7 +85,38 @@
 
     function clickNode(e, treeId, treeNode) {
         if (!treeNode.children) $.fn.zTree.getZTreeObj(treeId).expandNode(treeNode);
-        loadTableData(treeNode.children, treeNode);
+
+        layui.use(['table'], function () {
+            var table = layui.table;
+            if (treeNode.isParent) {
+                loadTableData(treeNode.children, treeNode);
+
+            } else {
+
+                $.ajax({
+                    url: 'getCollectionStructure?id=' + treeNode.collectionId,
+                    type: 'get',
+                    success: function (result) {
+                        table.reload("collectionStructure", { //其它参数在此省略
+                            data: result.data //赋值数据
+                        });
+                        var fields = [];
+                        $(result.data).each(function (index, row) {
+                            fields.push({field: row.COLUMN_NAME, title: row.COLUMN_NAME, width: 120});
+                        });
+
+                        table.render({
+                            elem: '#table_collection_data',
+                            url: 'getCollectionData?id=' + treeNode.collectionId
+                            , cols: [fields]
+                            , id: 'collectionData'
+                            , where: $("form").serializeJson()
+                            , height: 'auto', page: true
+                        });
+                    }
+                })
+            }
+        });
     }
 
     var loadTableData = function (datas, node) {
@@ -102,6 +129,30 @@
             table.reload("collectionReload", { //其它参数在此省略
                 data: array //赋值数据
             });
+            //监听工具条
+            table.on('tool(collection)', function (obj) {
+                var data = obj.data;
+                if (obj.event === 'del') {
+                    layer.confirm('真的删除行么', function (index) {
+                        $.ajax({
+                            url: 'collection?id=' + data.collectionId,
+                            type: 'DELETE',
+                            success: function (result) {
+                                if (result && result.code != 0) {
+                                    layer.alert(result.message, {icon: 5});
+                                } else {
+                                    layer.alert("删除成功", {icon: 6});
+                                    layer.close(index);
+                                    refreshNode();
+                                }
+                            }
+                        })
+                        ;
+                    });
+                } else if (obj.event === 'edit') {
+                    x_admin_show('修改数据', 'collection.html?id=' + data.collectionId);
+                }
+            });
         });
     };
 
@@ -113,7 +164,6 @@
             }
             else {
                 row.isParent = false;
-                row.isHidden = true
             }
         });
         var data = responseData.data;
@@ -132,23 +182,6 @@
         } else {
             $("#collection").hide();
             $("#collectionData").show();
-            layui.use(['table'], function () {
-                var table = layui.table;
-                table.render({
-                    elem: '#table_collection_structure',
-                    url: 'getCollectionStructure?id=' + treeNode.collectionId
-                    , cols: [[
-                        {field: 'COLUMN_NAME', title: '字段名称', width: 120}
-                        , {field: 'REMARKS', title: '字段描述', width: 160}
-                        , {field: 'TYPE_NAME', title: '字段类型', width: 160}
-                        , {field: 'COLUMN_SIZE', title: '字段长度', width: 160}
-                        , {field: 'DECIMAL_DIGITS', title: '字段精度', width: 160}
-                    ]]
-                    , id: 'collectionReload'
-                    , where: $("form").serializeJson()
-                    , height: 'auto', page: false
-                });
-            });
             return true;
         }
     }
@@ -179,32 +212,19 @@
             , id: 'collectionReload'
             , height: 'auto'
         })
-
-        //监听工具条
-        table.on('tool(collection)', function (obj) {
-            var data = obj.data;
-            if (obj.event === 'del') {
-                layer.confirm('真的删除行么', function (index) {
-                    $.ajax({
-                        url: 'collection?id=' + data.collectionId,
-                        type: 'DELETE',
-                        success: function (result) {
-                            if (result && result.code != 0) {
-                                layer.alert(result.message, {icon: 5});
-                            } else {
-                                layer.alert("删除成功", {icon: 6});
-                                layer.close(index);
-                                refreshNode();
-                            }
-                        }
-                    })
-                    ;
-                });
-            } else if (obj.event === 'edit') {
-                x_admin_show('修改机构', 'collection.html?id=' + data.collectionId);
-            }
+        table.render({
+            elem: '#table_collection_structure'
+            , cols: [[
+                {field: 'COLUMN_NAME', title: '字段名称', width: 160}
+                , {field: 'REMARKS', title: '字段描述', width: 160}
+                , {field: 'TYPE_NAME', title: '字段类型', width: 160}
+                , {field: 'COLUMN_SIZE', title: '字段长度', width: 160}
+                , {field: 'DECIMAL_DIGITS', title: '字段精度', width: 160}
+            ]]
+            , id: 'collectionStructure'
+            , where: $("form").serializeJson()
+            , height: 'auto', page: false
         });
-
 
     });
 
