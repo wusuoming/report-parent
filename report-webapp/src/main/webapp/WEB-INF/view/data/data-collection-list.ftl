@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>报表管理系统-机构保存</title>
+    <title>报表管理系统-数据集管理</title>
     <meta name="renderer" content="webkit">
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
     <meta name="viewport"
@@ -102,7 +102,13 @@
                         });
                         var fields = [];
                         $(result.data).each(function (index, row) {
-                            fields.push({field: row.COLUMN_NAME, title: row.COLUMN_NAME, width: 160, sort: true});
+                            fields.push({
+                                field: row.COLUMN_NAME,
+                                title: row.COLUMN_NAME,
+                                width: 160,
+                                align: 'center',
+                                sort: true
+                            });
                         });
 
                         table.render({
