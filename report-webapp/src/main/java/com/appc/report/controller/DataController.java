@@ -300,7 +300,12 @@ public class DataController {
         try {
             DruidDataSource dataSource = (DruidDataSource) DBContextHolder.getDataSource();
             Connection connection = dataSource.getConnection();
-            List columns = dynamicDataSourceService.loadDBColumn(connection, dataCollection.getCollectionValue());
+            List columns = null;
+            if ("sql".equals(dataCollection.getCollectionType())) {
+                columns = dynamicDataSourceService.loadSqlColumn(connection, dataCollection.getCollectionValue());
+            } else {
+                columns = dynamicDataSourceService.loadDBColumn(connection, dataCollection.getCollectionValue());
+            }
             dataSource.discardConnection(connection);
             dataSource.removeAbandoned();
             return columns;

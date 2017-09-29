@@ -9,6 +9,7 @@ import com.appc.framework.mybatis.route.DynamicDataSource;
 import com.appc.report.common.db.PropertyHolder;
 import com.appc.report.common.enums.DataSourseType;
 import com.appc.report.dao.DataSourceDao;
+import com.appc.report.dto.ColumnDto;
 import com.appc.report.model.DataCollection;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -91,6 +92,23 @@ public class DynamicDataSourceService {
 
     }
 
+    public List loadSqlColumn(Connection connection, String sql) throws SQLException {
+        List list = new ArrayList();
+        Statement stmt = connection.createStatement();
+        ResultSet results = stmt.executeQuery(sql);
+        ResultSetMetaData resultMetaData = results.getMetaData();
+        int cols = resultMetaData.getColumnCount();
+        for (int i = 1; i < cols; i++) {
+            ColumnDto columnDto = new ColumnDto();
+            columnDto.setColumnName(resultMetaData.getColumnName(i));
+            columnDto.setTypeName(resultMetaData.getColumnTypeName(i));
+            columnDto.setDecimalDigits(resultMetaData.getPrecision(i));
+            columnDto.setColumnSize(resultMetaData.getScale(i));
+            list.add(columnDto);
+        }
+        return list;
+    }
+
     public List loadDBColumn(Connection connection, String tableName) throws SQLException {
         DatabaseMetaData metaData = connection.getMetaData();
         //获取数据库类型
@@ -109,9 +127,7 @@ public class DynamicDataSourceService {
                 schema = schema.toUpperCase();
                 break;
             default:
-
         }
-
 
         ResultSet columns = metaData.getColumns(connection.getCatalog(), schema, tableName, "%");
         return resultSetToList(columns);
