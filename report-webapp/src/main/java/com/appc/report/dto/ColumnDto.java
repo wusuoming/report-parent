@@ -1,9 +1,9 @@
-package com.appc.report.model;
+package com.appc.report.dto;
 
 import lombok.Data;
 
 @Data
-public class Column {
+public class ColumnDto {
     private String tableName;
     private Boolean isNullable;
     private String remarks;

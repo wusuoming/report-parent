@@ -9,6 +9,7 @@ import com.appc.framework.mybatis.route.DBContextHolder;
 import com.appc.report.common.enums.CollectionType;
 import com.appc.report.common.enums.DataSourseType;
 import com.appc.report.common.enums.EncodingType;
+import com.appc.report.common.enums.FillterType;
 import com.appc.report.common.helper.JdbcUrlHelper;
 import com.appc.report.dto.PageDto;
 import com.appc.report.model.DataCollection;
@@ -190,6 +191,7 @@ public class DataController {
     @RequestMapping(value = "collection-list", method = RequestMethod.GET)
     public ModelAndView regionList() {
         ModelAndView mv = new ModelAndView("data/data-collection-list");
+        mv.addObject("fillterTypes", FillterType.values());
         return mv;
     }
 
@@ -262,21 +264,31 @@ public class DataController {
         }
     }
 
-    @RequestMapping(value = "getCollectionData", method = RequestMethod.GET)
+    @RequestMapping(value = "getCollectionData", method = {RequestMethod.GET, RequestMethod.POST})
     @ResponseBody
     public PageDto getCollectionData(@RequestParam Integer id, @RequestParam int page,
                                      @RequestParam int limit,
                                      @RequestParam(required = false) String sort,
-                                     @RequestParam(required = false) String order) {
+                                     @RequestParam(required = false) String order,
+                                     @RequestParam(required = false) String columnName,
+                                     @RequestParam(required = false) Integer fillterType,
+                                     @RequestParam(required = false) String[] queryValue) {
         Sort sortObj = null;
-
         if (!StringUtils.isEmpty(order)) {
             sortObj = new Sort(new Sort.Order(Sort.Direction.fromString(order), sort));
+        }
+        Criteria criteria = EntityCriteria.build();
+        if (!StringUtils.isEmpty(columnName) && fillterType != null) {
+            FillterType type = FillterType.getTypeByCode(fillterType);
+            if (type != null) {
+                type.buildCriteria(criteria, columnName, queryValue.length == 1 ? queryValue[0] : queryValue);
+            }
+
         }
         DataCollection dataCollection = dataCollectionService.getById(id);
         dynamicDataSourceService.putDataSource(dataCollection.getSourceId());
         Pageable pageable = new PageRequest(page - 1, limit, sortObj);
-        Page result = dynamicDataSourceService.getCollectionData(dataCollection, pageable);
+        Page result = dynamicDataSourceService.getCollectionData(dataCollection, criteria, pageable);
         return PageDto.create(result.getTotalElements(), result.getContent());
     }
 

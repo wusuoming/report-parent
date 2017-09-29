@@ -45,8 +45,32 @@
             </ul>
             <div class="layui-tab-content">
                 <div class="layui-tab-item layui-show">
+
                     <table class="layui-hide" id="table_collection_structure"
                            lay-filter="collectionStructure"></table>
+                </div>
+                <div class="layui-row">
+                    <form class="layui-form layui-col-md12 x-so layui-form-pane" id="dataQuery">
+                        <div class="layui-input-inline" id="columnName">
+                            <select name="columnName">
+                                <option value="">字段名</option>
+                            </select>
+                        </div>
+                        <div class="layui-input-inline">
+                            <select name="fillterType">
+                                <option value="">匹配类型</option>
+                            <#list fillterTypes as fillterType>
+                                <option value="${fillterType.code}">${fillterType.getName()}</option>
+                            </#list>
+                            </select>
+                        </div>
+                        <div class="layui-input-inline">
+                            <input type="text" name="queryValue" placeholder="查询条件" autocomplete="off"
+                                   class="layui-input">
+                        </div>
+                        <button type="submit" class="layui-btn" lay-submit lay-filter="sreach"><i class="layui-icon">&#xe615;</i>
+                        </button>
+                    </form>
                 </div>
                 <div class="layui-tab-item">
                     <table class="layui-hide" id="table_collection_data" lay-filter="collectionData"></table>
@@ -86,8 +110,10 @@
     function clickNode(e, treeId, treeNode) {
         if (!treeNode.children) $.fn.zTree.getZTreeObj(treeId).expandNode(treeNode);
 
-        layui.use(['table'], function () {
+        layui.use(['table', "form"], function () {
             var table = layui.table;
+            var form = layui.form;
+
             if (treeNode.isParent) {
                 loadTableData(treeNode.children, treeNode);
 
@@ -101,6 +127,8 @@
                             data: result.data //赋值数据
                         });
                         var fields = [];
+                        $("#columnName").find("select").empty();
+                        $("#columnName").find("select").append("<option value=\"\">字段名</option>");
                         $(result.data).each(function (index, row) {
                             fields.push({
                                 field: row.COLUMN_NAME,
@@ -109,8 +137,9 @@
                                 align: 'center',
                                 sort: true
                             });
+                            $("#columnName").find("select").append("<option value=\"" + row.COLUMN_NAME + "\">" + row.COLUMN_NAME + "</option>")
                         });
-
+                        form.render("select");
                         table.render({
                             elem: '#table_collection_data',
                             url: 'getCollectionData?id=' + treeNode.collectionId
@@ -201,7 +230,7 @@
         var table = layui.table;
         var form = layui.form;
         form.on('submit(sreach)', function (data) {
-            table.reload('collectionReload', {
+            table.reload('collectionData', {
                 where: data.field //设定异步数据接口的额外参数
             });
 

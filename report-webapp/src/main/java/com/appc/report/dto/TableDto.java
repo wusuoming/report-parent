@@ -1,7 +1,7 @@
-package com.appc.report.model;
+package com.appc.report.dto;
 
 
-public class Table {
+public class TableDto {
     private String tableName;
     private String tableType;
     private String remarks;

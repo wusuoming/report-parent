@@ -3,6 +3,7 @@ package com.appc.report.service;
 import com.alibaba.druid.pool.DruidDataSource;
 import com.appc.framework.mybatis.common.enums.DBType;
 import com.appc.framework.mybatis.common.utils.ReflectionUtils;
+import com.appc.framework.mybatis.executor.criteria.Criteria;
 import com.appc.framework.mybatis.route.DBContextHolder;
 import com.appc.framework.mybatis.route.DynamicDataSource;
 import com.appc.report.common.db.PropertyHolder;
@@ -133,7 +134,9 @@ public class DynamicDataSourceService {
         return list;
     }
 
-    public Page getCollectionData(DataCollection dataCollection, Pageable pageable) {
-        return dataSourceDao.getCollectionData(dataCollection, pageable);
+    public Page getCollectionData(DataCollection dataCollection, Criteria criteria, Pageable pageable) {
+        return dataSourceDao.getCollectionData(dataCollection, criteria, pageable);
     }
+
+
 }

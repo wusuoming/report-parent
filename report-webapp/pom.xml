@@ -105,7 +105,7 @@
         <dependency>
             <groupId>com.appc</groupId>
             <artifactId>framework-mybatis</artifactId>
-            <version>1.0.7-RELEASE</version>
+            <version>1.0.8-SNAPSHOT</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.slf4j</groupId>
