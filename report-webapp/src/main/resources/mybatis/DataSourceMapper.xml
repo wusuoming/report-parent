@@ -3,10 +3,10 @@
 <mapper namespace="com.appc.report.dao.DataSourceDao">
     <select id="getCollectionData" resultType="map">
         <if test="dataCollection.collectionType =='sql' ">
-            SELECT * FROM ( ${dataCollection.collectionValue} ) where 1=1
+            SELECT * FROM ( ${dataCollection.collectionValue} ) t where 1=1
         </if>
         <if test="dataCollection.collectionType !='sql' ">
-            SELECT * FROM ${dataCollection.collectionValue} t where 1=1
+            SELECT * FROM ${dataCollection.collectionValue}   where 1=1
         </if>
     </select>
 </mapper>

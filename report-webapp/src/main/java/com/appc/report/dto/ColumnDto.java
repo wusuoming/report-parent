@@ -8,10 +8,10 @@ public class ColumnDto {
     private Boolean isNullable;
     private String remarks;
     private String tableSchem;
-    private int columnSize;
+    private Integer columnSize;
     private String typeName;
     private String columnName;
-    private int decimalDigits;
+    private Integer decimalDigits;
     private Boolean isAutoincrement;
 
 

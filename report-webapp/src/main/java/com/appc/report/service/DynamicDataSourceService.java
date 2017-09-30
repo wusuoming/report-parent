@@ -116,32 +116,48 @@ public class DynamicDataSourceService {
         String schema = connection.getMetaData().getUserName();
         switch (dbType) {
             case MYSQL:
-                break;
+                return mysqlColumn(metaData.getColumns(connection.getCatalog(), schema, tableName, "%"));
             case POSTGRESQL:
                 schema = "%";
-                break;
+                return resultSetToList(metaData.getColumns(connection.getCatalog(), schema, tableName, "%"));
             case SQL_SERVER:
                 schema = PropertyHolder.getGeneratorProperty("mssql.schema");
-                break;
+                return resultSetToList(metaData.getColumns(connection.getCatalog(), schema, tableName, "%"));
             case ORACLE:
                 schema = schema.toUpperCase();
-                break;
+                return resultSetToList(metaData.getColumns(connection.getCatalog(), schema, tableName, "%"));
             default:
+                return resultSetToList(metaData.getColumns(connection.getCatalog(), schema, tableName, "%"));
         }
-
-        ResultSet columns = metaData.getColumns(connection.getCatalog(), schema, tableName, "%");
-        return resultSetToList(columns);
     }
 
-    private List resultSetToList(ResultSet rs) throws java.sql.SQLException {
+    private List<ColumnDto> mysqlColumn(ResultSet rs) throws SQLException {
+        List<Map<String, Object>> list = resultSetToList(rs);
+        List<ColumnDto> columns = new ArrayList<>();
+        for (Map<String, Object> stringObjectMap : list) {
+            ColumnDto columnDto = new ColumnDto();
+            columnDto.setIsNullable("YES".equals(stringObjectMap.get("IS_NULLABLE")));
+            columnDto.setColumnSize((Integer) stringObjectMap.get("COLUMN_SIZE"));
+            columnDto.setDecimalDigits((Integer) stringObjectMap.get("DECIMAL_DIGITS"));
+            columnDto.setTypeName((String) stringObjectMap.get("TYPE_NAME"));
+            columnDto.setColumnName((String) stringObjectMap.get("COLUMN_NAME"));
+            columnDto.setRemarks((String) stringObjectMap.get("REMARKS"));
+            columnDto.setTableName((String) stringObjectMap.get("TABLE_NAME"));
+            columnDto.setTableSchem((String) stringObjectMap.get("TABLE_CAT"));
+            columnDto.setIsAutoincrement("YES".equals(stringObjectMap.get("IS_AUTOINCREMENT")));
+            columns.add(columnDto);
+        }
+        return columns;
+    }
+
+    private List<Map<String, Object>> resultSetToList(ResultSet rs) throws java.sql.SQLException {
         if (rs == null)
-            return Collections.EMPTY_LIST;
+            return Collections.emptyList();
         ResultSetMetaData md = rs.getMetaData(); //得到结果集(rs)的结构信息，比如字段数、字段名等
         int columnCount = md.getColumnCount(); //返回此 ResultSet 对象中的列数
-        List list = new ArrayList();
-        Map rowData = new HashMap();
+        List<Map<String, Object>> list = new ArrayList<>();
         while (rs.next()) {
-            rowData = new HashMap(columnCount);
+            Map<String, Object> rowData = new HashMap<>();
             for (int i = 1; i <= columnCount; i++) {
                 rowData.put(md.getColumnName(i), rs.getObject(i));
             }

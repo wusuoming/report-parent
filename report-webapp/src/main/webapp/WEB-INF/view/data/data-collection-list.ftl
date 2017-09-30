@@ -131,13 +131,13 @@
                         $("#columnName").find("select").append("<option value=\"\">字段名</option>");
                         $(result.data).each(function (index, row) {
                             fields.push({
-                                field: row.COLUMN_NAME,
-                                title: row.COLUMN_NAME,
+                                field: row.columnName,
+                                title: row.columnName,
                                 width: 160,
                                 align: 'center',
                                 sort: true
                             });
-                            $("#columnName").find("select").append("<option value=\"" + row.COLUMN_NAME + "\">" + row.COLUMN_NAME + "</option>")
+                            $("#columnName").find("select").append("<option value=\"" + row.columnName + "\">" + row.columnName + "</option>")
                         });
                         form.render("select");
                         table.render({
@@ -250,11 +250,11 @@
         table.render({
             elem: '#table_collection_structure'
             , cols: [[
-                {field: 'COLUMN_NAME', title: '字段名称', width: 160}
-                , {field: 'REMARKS', title: '字段描述', width: 160}
-                , {field: 'TYPE_NAME', title: '字段类型', width: 160}
-                , {field: 'COLUMN_SIZE', title: '字段长度', width: 160}
-                , {field: 'DECIMAL_DIGITS', title: '字段精度', width: 160}
+                {field: 'columnName', title: '字段名称', width: 160}
+                , {field: 'remarks', title: '字段描述', width: 160}
+                , {field: 'typeName', title: '字段类型', width: 160}
+                , {field: 'columnSize', title: '字段长度', width: 160}
+                , {field: 'decimalDigits', title: '字段精度', width: 160}
             ]]
             , id: 'collectionStructure'
             , where: $("form").serializeJson()

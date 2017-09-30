@@ -110,7 +110,7 @@
                 描述
             </label>
             <div class="layui-input-block">
-<textarea type="text" id="L_collectionDescription" name="collectionDescription"
+                <textarea type="text" id="L_collectionDiscription" name="collectionDiscription"
           required class="layui-textarea  ">${collection.collectionDiscription}</textarea>
             </div>
         </div>

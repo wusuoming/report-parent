@@ -224,6 +224,9 @@ public class DataController {
     @RequestMapping(value = "collection", method = RequestMethod.POST)
     public ModelAndView regionPost(DataCollection collection) {
         ModelAndView mv = new ModelAndView("data/data-collection");
+        if ("sql".equals(collection.getCollectionType()) && !checkSql(collection)) {
+                throw new BaseException("020006");
+        }
         dataCollectionService.save(collection);
         mv.addObject("success", true);
         mv.addObject("collectionId", collection.getParentId());
@@ -313,6 +316,22 @@ public class DataController {
             e.printStackTrace();
         }
         return null;
+    }
+
+    private Boolean checkSql(DataCollection dataCollection) {
+        dynamicDataSourceService.putDataSource(dataCollection.getSourceId());
+        try {
+            DruidDataSource dataSource = (DruidDataSource) DBContextHolder.getDataSource();
+            Connection connection = dataSource.getConnection();
+            List columns = dynamicDataSourceService.loadSqlColumn(connection, dataCollection.getCollectionValue());
+            dataSource.discardConnection(connection);
+            dataSource.removeAbandoned();
+            DBContextHolder.putDataSource("local");
+            return !columns.isEmpty();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 
 
