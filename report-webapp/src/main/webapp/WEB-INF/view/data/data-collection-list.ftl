@@ -49,30 +49,32 @@
                     <table class="layui-hide" id="table_collection_structure"
                            lay-filter="collectionStructure"></table>
                 </div>
-                <div class="layui-row">
-                    <form class="layui-form layui-col-md12 x-so layui-form-pane" id="dataQuery">
-                        <div class="layui-input-inline" id="columnName">
-                            <select name="columnName">
-                                <option value="">字段名</option>
-                            </select>
-                        </div>
-                        <div class="layui-input-inline">
-                            <select name="fillterType">
-                                <option value="">匹配类型</option>
-                            <#list fillterTypes as fillterType>
-                                <option value="${fillterType.code}">${fillterType.getName()}</option>
-                            </#list>
-                            </select>
-                        </div>
-                        <div class="layui-input-inline">
-                            <input type="text" name="queryValue" placeholder="查询条件" autocomplete="off"
-                                   class="layui-input">
-                        </div>
-                        <button type="submit" class="layui-btn" lay-submit lay-filter="sreach"><i class="layui-icon">&#xe615;</i>
-                        </button>
-                    </form>
-                </div>
+
                 <div class="layui-tab-item">
+                    <div class="layui-row">
+                        <form class="layui-form layui-col-md12 x-so layui-form-pane" id="dataQuery">
+                            <div class="layui-input-inline" id="columnName">
+                                <select name="columnName">
+                                    <option value="">字段名</option>
+                                </select>
+                            </div>
+                            <div class="layui-input-inline">
+                                <select name="fillterType">
+                                    <option value="">匹配类型</option>
+                                <#list fillterTypes as fillterType>
+                                    <option value="${fillterType.code}">${fillterType.getName()}</option>
+                                </#list>
+                                </select>
+                            </div>
+                            <div class="layui-input-inline">
+                                <input type="text" name="queryValue" placeholder="查询条件" autocomplete="off"
+                                       class="layui-input">
+                            </div>
+                            <button type="submit" class="layui-btn" lay-submit lay-filter="sreach"><i
+                                    class="layui-icon">&#xe615;</i>
+                            </button>
+                        </form>
+                    </div>
                     <table class="layui-hide" id="table_collection_data" lay-filter="collectionData"></table>
                 </div>
             </div>

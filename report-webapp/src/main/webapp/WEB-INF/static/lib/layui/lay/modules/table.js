@@ -180,7 +180,7 @@ layui.define(['laytpl', 'laypage', 'layer', 'form'], function (exports) {
 
     //默认配置
     Class.prototype.config = {
-        limit: 30 //每页显示的数量
+        limit: 10 //每页显示的数量
         , loading: true //请求数据时，是否显示loading
     };
 
