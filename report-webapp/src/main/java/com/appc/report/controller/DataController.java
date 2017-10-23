@@ -225,7 +225,7 @@ public class DataController {
     public ModelAndView regionPost(DataCollection collection) {
         ModelAndView mv = new ModelAndView("data/data-collection");
         if ("sql".equals(collection.getCollectionType()) && !checkSql(collection)) {
-                throw new BaseException("020006");
+            throw new BaseException("020006");
         }
         dataCollectionService.save(collection);
         mv.addObject("success", true);
@@ -275,7 +275,8 @@ public class DataController {
                                      @RequestParam(required = false) String order,
                                      @RequestParam(required = false) String columnName,
                                      @RequestParam(required = false) Integer fillterType,
-                                     @RequestParam(required = false) String[] queryValue) {
+                                     @RequestParam(required = false) String queryValue,
+                                     @RequestParam(required = false) String queryValue2) {
         Sort sortObj = null;
         if (!StringUtils.isEmpty(order)) {
             sortObj = new Sort(new Sort.Order(Sort.Direction.fromString(order), sort));
@@ -284,7 +285,7 @@ public class DataController {
         if (!StringUtils.isEmpty(columnName) && fillterType != null) {
             FillterType type = FillterType.getTypeByCode(fillterType);
             if (type != null) {
-                type.buildCriteria(criteria, columnName, queryValue.length == 1 ? queryValue[0] : queryValue);
+                type.buildCriteria(criteria, columnName, StringUtils.isEmpty(queryValue2) ? queryValue : new String[]{queryValue, queryValue2});
             }
 
         }

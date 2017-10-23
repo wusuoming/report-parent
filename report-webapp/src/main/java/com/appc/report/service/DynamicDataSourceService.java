@@ -7,6 +7,7 @@ import com.appc.framework.mybatis.executor.criteria.Criteria;
 import com.appc.framework.mybatis.route.DBContextHolder;
 import com.appc.framework.mybatis.route.DynamicDataSource;
 import com.appc.report.common.db.PropertyHolder;
+import com.appc.report.common.enums.ColumnType;
 import com.appc.report.common.enums.DataSourseType;
 import com.appc.report.dao.DataSourceDao;
 import com.appc.report.dto.ColumnDto;
@@ -140,6 +141,7 @@ public class DynamicDataSourceService {
             columnDto.setColumnSize((Integer) stringObjectMap.get("COLUMN_SIZE"));
             columnDto.setDecimalDigits((Integer) stringObjectMap.get("DECIMAL_DIGITS"));
             columnDto.setTypeName((String) stringObjectMap.get("TYPE_NAME"));
+            columnDto.setDataType(ColumnType.getTypeByCode((Integer) stringObjectMap.get("DATA_TYPE")).getDataType());
             columnDto.setColumnName((String) stringObjectMap.get("COLUMN_NAME"));
             columnDto.setRemarks((String) stringObjectMap.get("REMARKS"));
             columnDto.setTableName((String) stringObjectMap.get("TABLE_NAME"));

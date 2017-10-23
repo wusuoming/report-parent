@@ -54,21 +54,20 @@
                     <div class="layui-row">
                         <form class="layui-form layui-col-md12 x-so layui-form-pane" id="dataQuery">
                             <div class="layui-input-inline" id="columnName">
-                                <select name="columnName">
+                                <select name="columnName" lay-filter="columnName">
                                     <option value="">字段名</option>
                                 </select>
                             </div>
-                            <div class="layui-input-inline">
-                                <select name="fillterType">
+                            <div class="layui-input-inline" id="fillterType">
+                                <select name="fillterType" lay-filter="fillterType">
                                     <option value="">匹配类型</option>
                                 <#list fillterTypes as fillterType>
                                     <option value="${fillterType.code}">${fillterType.getName()}</option>
                                 </#list>
                                 </select>
                             </div>
-                            <div class="layui-input-inline">
-                                <input type="text" name="queryValue" placeholder="查询条件" autocomplete="off"
-                                       class="layui-input">
+                            <div class="layui-input-inline" id="queryValue">
+
                             </div>
                             <button type="submit" class="layui-btn" lay-submit lay-filter="sreach"><i
                                     class="layui-icon">&#xe615;</i>
@@ -85,7 +84,7 @@
             layui.use('element', function () {
                 var element = layui.element;
                 element.on('tab(tab)', function () {
-                    console.log(this);
+//                    console.log(this);
                 });
             });
         </script>
@@ -109,18 +108,55 @@
         }
     };
 
+    function reloadQueryValue(fieldData) {
+        var columnName = $("#columnName").find("select").val();
+        var fillterType = $("#fillterType").find("select").val();
+        if (columnName && fillterType) {
+            $("#queryValue").empty();
+            $(fieldData).each(function (index, row) {
+                if (row.columnName == columnName) {
+                    if (fillterType == 7||fillterType == 8) {
+                        $("#queryValue").append("<input type=\"text\" name=\"queryValue\" placeholder=\"开始\" autocomplete=\"off\"\n" +
+                                "        class=\"layui-input\">");
+                        $("#queryValue").append("<input type=\"text\" name=\"queryValue2\" placeholder=\"结束\" autocomplete=\"off\"\n" +
+                                "        class=\"layui-input\">");
+                    } else if (fillterType == 9 || fillterType == 10 || fillterType == 17 || fillterType == 180) {
+                        $("#queryValue").append("");
+                    } else {
+                        $("#queryValue").append("<input type=\"text\" name=\"queryValue\" placeholder=\"查询条件\" autocomplete=\"off\"\n" +
+                                "        class=\"layui-input\">");
+                    }
+
+                }
+            });
+
+        } else {
+            $("#queryValue").empty();
+        }
+    }
+
     function clickNode(e, treeId, treeNode) {
         if (!treeNode.children) $.fn.zTree.getZTreeObj(treeId).expandNode(treeNode);
 
         layui.use(['table', "form"], function () {
+            var fields = [];
+            var fieldData;
+
             var table = layui.table;
             var form = layui.form;
-
             if (treeNode.isParent) {
                 loadTableData(treeNode.children, treeNode);
 
             } else {
-
+                $("#columnName").find("select").val("");
+                $("#fillterType").find("select").val("");
+                $("#queryValue").find("input").val("");
+                form.on('select(fillterType)', function (data) {
+                    reloadQueryValue(fieldData);
+                });
+                form.on('select(columnName)', function (data) {
+                    reloadQueryValue(fieldData);
+                });
                 $.ajax({
                     url: 'getCollectionStructure?id=' + treeNode.collectionId,
                     type: 'get',
@@ -128,10 +164,11 @@
                         table.reload("collectionStructure", { //其它参数在此省略
                             data: result.data //赋值数据
                         });
-                        var fields = [];
+
                         $("#columnName").find("select").empty();
                         $("#columnName").find("select").append("<option value=\"\">字段名</option>");
-                        $(result.data).each(function (index, row) {
+                        fieldData = result.data;
+                        $(fieldData).each(function (index, row) {
                             fields.push({
                                 field: row.columnName,
                                 title: row.columnName,
@@ -233,7 +270,7 @@
         var form = layui.form;
         form.on('submit(sreach)', function (data) {
             table.reload('collectionData', {
-                where: data.field //设定异步数据接口的额外参数
+                where: $("form").serializeJson() //设定异步数据接口的额外参数
             });
 
             return false;
