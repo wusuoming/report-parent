@@ -114,21 +114,32 @@
         if (columnName && fillterType) {
             $("#queryValue").empty();
             $(fieldData).each(function (index, row) {
-                if (row.columnName == columnName) {
-                    if (fillterType == 7||fillterType == 8) {
-                        $("#queryValue").append("<input type=\"text\" name=\"queryValue\" placeholder=\"开始\" autocomplete=\"off\"\n" +
-                                "        class=\"layui-input\">");
-                        $("#queryValue").append("<input type=\"text\" name=\"queryValue2\" placeholder=\"结束\" autocomplete=\"off\"\n" +
-                                "        class=\"layui-input\">");
-                    } else if (fillterType == 9 || fillterType == 10 || fillterType == 17 || fillterType == 180) {
-                        $("#queryValue").append("");
-                    } else {
-                        $("#queryValue").append("<input type=\"text\" name=\"queryValue\" placeholder=\"查询条件\" autocomplete=\"off\"\n" +
-                                "        class=\"layui-input\">");
-                    }
+                        if (row.columnName == columnName) {
+                            if (fillterType == 7 || fillterType == 8) {
+                                $("#queryValue").append("<input type=\"text\" class=\"layui-input\" name=\"queryValue\" id=\"queryValueId\" placeholder=\"开始\"  " +
+                                        "        class=\"layui-input\">");
+                                $("#queryValue").append("<input type=\"text\" class=\"layui-input\" name=\"queryValue2\" id=\"queryValueId2\" placeholder=\"结束\"  " +
+                                        "        class=\"layui-input\">");
+                            } else if (fillterType == 9 || fillterType == 10 || fillterType == 17 || fillterType == 180) {
+                                $("#queryValue").append("");
+                            } else {
+                                $("#queryValue").append("<input type=\"text\" class=\"layui-input\" name=\"queryValue\" id=\"queryValueId\" placeholder=\"查询条件\" " +
+                                        "        class=\"layui-input\">");
+                            }
+                            if (row.dataType == 4 || row.dataType == 5 || row.dataType == 6) {
+                                layui.use(['laydate', "form"], function () {
+                                    var laydate = layui.laydate;
+                                    $("#queryValue").find("input").each(function (index, input) {
+                                        laydate.render({
+                                            elem: '#' + $(input).attr("id")
+                                        });
+                                    });
 
-                }
-            });
+                                });
+                            }
+                        }
+                    }
+            );
 
         } else {
             $("#queryValue").empty();
